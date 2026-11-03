@@ -9,12 +9,10 @@
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
 export class WorldCameraController {
-  constructor(canvas, { isActive, onTap, onLongPress, onHoldProgress, onHover, onLeave }) {
+  constructor(canvas, { isActive, onTap, onHover, onLeave }) {
     this.canvas = canvas;
     this.isActive = isActive;
     this.onTap = onTap;
-    this.onLongPress = onLongPress;
-    this.onHoldProgress = onHoldProgress;
     this.onHover = onHover;
     this.onLeave = onLeave;
 
@@ -141,28 +139,7 @@ export class WorldCameraController {
   }
 
   update(dt) {
-    if (this.pointers.size > 0) {
-      if (this.pointers.size === 1 && this.holdStart && !this.wasMultiTouch && !this.holdStart.fired) {
-        const lim = this.downPointerType === 'touch' ? 12 : 7;
-        if (this.gestureMovedPx <= lim) {
-          const elapsed = performance.now() - this.holdStart.ts;
-          if (elapsed >= 85) {
-            const p = Math.min(1, (elapsed - 85) / 295);
-            this.onHoldProgress?.(this.holdStart.x, this.holdStart.y, p, this.holdStart.pointerType);
-            if (p >= 1) {
-              this.holdStart.fired = true;
-              this._lastPointerTapTs = performance.now();
-              this.onHoldProgress?.(0, 0, 0, this.holdStart.pointerType);
-              this.onLongPress?.(this.holdStart.x, this.holdStart.y, this.holdStart.pointerType);
-            }
-          }
-        } else {
-          this.holdStart = null;
-          this.onHoldProgress?.(0, 0, 0, this.downPointerType);
-        }
-      }
-      return;
-    }
+    if (this.pointers.size > 0) return;
 
     if (this.animTarget) {
       const k = 1 - Math.exp(-dt * 9.5);
@@ -194,12 +171,7 @@ export class WorldCameraController {
     this.edgePills = [];
     this.radarRect = null;
 
-    if (
-      viewH >= 360 &&
-      viewW >= 340 &&
-      hotspots.length > 0 &&
-      (this.zoom > 1.12 || this.canvas.classList.contains('is-panning'))
-    ) {
+    if (viewH >= 360 && viewW >= 340 && hotspots.length > 0) {
       this._drawMiniRadar(ctx, viewW, viewH, hotspots, isCastle);
     }
 
@@ -246,7 +218,14 @@ export class WorldCameraController {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       const ic = isCastle ? '⭐' : '🪄';
-      const label = side === 'left' ? `◀ ${ic}${list.length}` : side === 'right' ? `${list.length}${ic} ▶` : side === 'top' ? `▲ ${ic}${list.length}` : `▼ ${ic}${list.length}`;
+      const label =
+        side === 'left'
+          ? `◀ ${ic}${list.length}`
+          : side === 'right'
+            ? `${list.length}${ic} ▶`
+            : side === 'top'
+              ? `▲ ${ic}${list.length}`
+              : `▼ ${ic}${list.length}`;
       ctx.fillText(label, px + pw * 0.5, py + ph * 0.5 + 0.5);
       ctx.restore();
     };
@@ -274,6 +253,7 @@ export class WorldCameraController {
     ctx.fill();
     ctx.stroke();
 
+    // Live viewport rectangle inside the panoramic world
     const dx = (viewW - this.dw) * 0.5 + this.panX;
     const dy = (viewH - this.dh) * 0.5 + this.panY;
     const vx0 = clamp(-dx / Math.max(1, this.dw), 0, 1);
@@ -284,7 +264,12 @@ export class WorldCameraController {
     ctx.fillStyle = 'rgba(255, 234, 156, 0.16)';
     ctx.strokeStyle = '#ffea9c';
     ctx.lineWidth = 1.2;
-    ctx.strokeRect(rx + vx0 * rw, ry + vy0 * rh, Math.min(rw - vx0 * rw, vwFrac * rw), Math.min(rh - vy0 * rh, vhFrac * rh));
+    ctx.strokeRect(
+      rx + vx0 * rw,
+      ry + vy0 * rh,
+      Math.min(rw - vx0 * rw, vwFrac * rw),
+      Math.min(rh - vy0 * rh, vhFrac * rh)
+    );
 
     for (const hs of hotspots) {
       const px = rx + clamp(hs.nx, 0.05, 0.95) * rw;
@@ -304,7 +289,10 @@ export class WorldCameraController {
     if (this.radarRect) {
       const r = this.radarRect;
       if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) {
-        return { nx: clamp((x - r.x) / r.w, 0.05, 0.95), ny: clamp((y - r.y) / r.h, 0.08, 0.92) };
+        return {
+          nx: clamp((x - r.x) / r.w, 0.05, 0.95),
+          ny: clamp((y - r.y) / r.h, 0.08, 0.92),
+        };
       }
     }
     for (const pill of this.edgePills) {
@@ -339,15 +327,10 @@ export class WorldCameraController {
     const endPointer = (e, allowTap) => {
       if (!this.pointers.has(e.pointerId)) return;
       this.pointers.delete(e.pointerId);
-      const longFired = Boolean(this.holdStart?.fired);
-      if (this.pointers.size === 0) {
-        this.holdStart = null;
-        this.onHoldProgress?.(0, 0, 0, this.downPointerType);
-      }
       if (this.pointers.size === 0 && !this.isActive()) return;
 
       const tapLimit = this.downPointerType === 'touch' ? 11 : 6;
-      if (allowTap && !longFired && !this.wasMultiTouch && this.gestureMovedPx <= tapLimit && this.isActive()) {
+      if (allowTap && !this.wasMultiTouch && this.gestureMovedPx <= tapLimit && this.isActive()) {
         this._lastPointerTapTs = performance.now();
         this.velX = 0;
         this.velY = 0;
@@ -379,19 +362,10 @@ export class WorldCameraController {
         this.gestureMovedPx = 0;
         this.downPointerType = e.pointerType || 'mouse';
         this.lastMoveTs = performance.now();
-        this.holdStart = {
-          ts: performance.now(),
-          x: e.clientX,
-          y: e.clientY,
-          pointerType: this.downPointerType,
-          fired: false,
-        };
       }
       this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
       if (this.pointers.size >= 2) {
         this.wasMultiTouch = true;
-        this.holdStart = null;
-        this.onHoldProgress?.(0, 0, 0, this.downPointerType);
         this._initPinch();
       }
     });

@@ -15,7 +15,7 @@
         <span class="launcher-badge">⚡ Wizarding World Edition · Playrix Mechanics ⚡</span>
         <h1>HOGWARTS CASTLE &amp; GROUNDS</h1>
         <p>
-          Bước vào Thế Giới Phù Thủy Harry Potter 100% Full 3D: Giải đố Match-3 cổ vật &amp; thảo dược + Khôi phục Lâu Đài Hogwarts cắt lớp 3D &amp; Khuôn Viên Hang Sóc 3D với 3 phong cách Nhà và Hầm Ngục Gringotts!
+          Bước vào Thế Giới Phù Thủy Harry Potter: Giải đố Match-3 cổ vật &amp; thảo dược + Khôi phục Lâu Đài Hogwarts &amp; Khuôn Viên Rừng Cấm 2.5D với 3 phong cách Nhà và Hầm Ngục Gringotts Rút Chốt!
         </p>
       </header>
 
@@ -82,65 +82,27 @@
       </section>
     </main>
 
-    <!-- 2. Shared Game Shell (World Hybrid 3D + Match-3 Stage) -->
+    <!-- 2. Shared Game Shell (World 2.5D + Match-3 Stage) -->
     <div id="game-shell" class="scapes-shell hidden" data-game="homescapes">
       <header class="top-hud">
-        <div class="hud-group hud-resources">
-          <div class="hud-pill p25-res-pill res-lives" title="Tim phép thuật">
-            <span class="res-icon-badge" aria-hidden="true">❤️</span>
-            <span id="hud-lives">5</span>
-          </div>
-          <div class="hud-pill p25-res-pill res-stars" title="Sao phép cải tạo">
-            <span class="res-icon-badge" aria-hidden="true">⭐</span>
-            <span id="hud-stars">2</span>
-          </div>
-          <div class="hud-pill p25-res-pill res-coins" id="hud-coin-pill" title="Vàng Galleon — Chạm để mở Tiệm Hẻm Xéo">
-            <span class="res-icon-badge" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.5" fill="#ffd43b" stroke="#9c5700" stroke-width="2"/><circle cx="12" cy="12" r="7.5" fill="#fab005" stroke="#fff3bf" stroke-width="1.2"/><text x="12" y="15.8" text-anchor="middle" font-size="10.5" font-weight="900" fill="#6e3500" font-family="Georgia,serif">G</text></svg></span>
-            <span id="hud-coins">1,500</span>
-            <span class="res-plus-badge" aria-hidden="true">+</span>
-          </div>
-        </div>
-
-        <div class="hud-group hud-actions">
-          <button type="button" class="p25-round-btn p25-btn-cam" id="btn-cam-angle" title="Xoay Góc Nhìn 3D (Chuẩn 32° / Nghiêng Phải / Nghiêng Trái / Toàn Cảnh Trên Cao)" aria-label="Đổi góc camera 3D">🎥</button>
-          <button type="button" class="p25-round-btn p25-btn-design" id="btn-design-mode" title="Chế độ Đổi Kiểu Cổ Vật (hoặc nhấn giữ 0.4s vào cổ vật)" aria-label="Chế độ Đổi Kiểu Cổ Vật" aria-pressed="false">🎨</button>
-          <button type="button" class="p25-round-btn p25-btn-menu" id="btn-magic-menu" title="Menu Phép Thuật &amp; Tiện Ích" aria-label="Menu Phép Thuật" aria-expanded="false">
-            🧭
-            <span id="magic-menu-badge" class="notif-badge hidden">0</span>
+        <div class="hud-group">
+          <button type="button" class="btn-playrix btn-purple" id="btn-back-hub" aria-label="Về Sân Ga 9¾">◀ <span class="hud-btn-label">Sân Ga 9¾</span></button>
+          <span class="hud-pill" id="hud-game-title">🏰 LÂU ĐÀI HOGWARTS</span>
+          <button type="button" class="btn-playrix btn-gold" id="btn-quick-switch" title="Độn thổ sang khu kia" aria-label="Độn thổ sang thế giới phép thuật kia">
+            ⇄ <span class="hud-btn-label">Độn Thổ</span>
           </button>
-          <button type="button" class="p25-round-btn p25-btn-gear" id="btn-open-settings" title="Cài đặt" aria-label="Cài đặt">⚙️</button>
         </div>
 
-        <div id="magic-menu-drawer" class="magic-menu-drawer hidden" role="region" aria-label="Menu Phép Thuật Hogwarts">
-          <div class="magic-drawer-head">
-            <span class="hud-pill" id="hud-game-title">🏰 LÂU ĐÀI HOGWARTS</span>
-          </div>
-          <div class="magic-drawer-grid">
-            <button type="button" class="btn-playrix btn-purple" id="btn-back-hub" aria-label="Về Sân Ga 9¾">◀ <span class="hud-btn-label">Sân Ga 9¾</span></button>
-            <button type="button" class="btn-playrix btn-gold" id="btn-quick-switch" title="Độn thổ sang khu kia" aria-label="Độn thổ sang thế giới phép thuật kia">
-              ⇄ <span class="hud-btn-label">Độn Thổ</span>
-            </button>
-            <button type="button" class="btn-playrix btn-gold" id="btn-open-shop" aria-label="Mở Hẻm Xéo">🎡 <span class="hud-btn-label">Hẻm Xéo</span></button>
-            <button type="button" class="world-rail-btn" id="btn-open-online" title="Hội Nhà Hogwarts &amp; Thăm Vườn Online" aria-label="Hội Nhà Hogwarts">
-              🏰 <span class="world-rail-label">Hội Nhà</span>
-              <span id="online-badge" class="notif-badge hidden">0</span>
-            </button>
-            <button type="button" class="world-rail-btn" id="btn-open-events" title="Vé Mùa Giải &amp; Bộ Sưu Tập Thẻ Ếch Sô-cô-la" aria-label="Vé Mùa Giải &amp; Thẻ Ếch">
-              🏆 <span class="world-rail-label">Vé Mùa</span>
-              <span id="events-badge" class="notif-badge hidden">0</span>
-            </button>
-            <button type="button" class="world-rail-btn" id="btn-weather-cycle" title="Đổi thời tiết: Ngày / Đêm Trăng / Tuyết" aria-label="Đổi thời tiết">☀️</button>
-            <button type="button" class="world-rail-btn" id="btn-photo-export" title="Chụp ảnh bưu thiếp Khuôn Viên" aria-label="Chụp ảnh Khuôn Viên">📸</button>
-          </div>
-          <div class="world-zoom-pill" role="group" aria-label="Thu phóng bản đồ">
-            <button type="button" class="world-zoom-btn" id="btn-map-zoom-out" title="Thu nhỏ bản đồ" aria-label="Thu nhỏ bản đồ">−</button>
-            <button type="button" class="world-zoom-btn" id="btn-map-overview" title="Xem toàn cảnh 9 điểm trang trí">🗺️ Toàn Cảnh</button>
-            <button type="button" class="world-zoom-btn" id="btn-map-zoom-in" title="Phóng to bản đồ" aria-label="Phóng to bản đồ">+</button>
-          </div>
+        <div class="hud-group">
+          <div class="hud-pill" title="Tim phép thuật">❤️ <span id="hud-lives">5</span></div>
+          <div class="hud-pill" title="Sao phép cải tạo">⭐ <span id="hud-stars">2</span></div>
+          <div class="hud-pill" title="Vàng Galleon">💰 <span id="hud-coins">1,500</span></div>
+          <button type="button" class="btn-playrix btn-gold" id="btn-open-shop" aria-label="Mở Hẻm Xéo">🎡 <span class="hud-btn-label">Hẻm Xéo</span></button>
+          <button type="button" class="btn-playrix btn-purple" id="btn-open-settings" aria-label="Cài đặt">⚙️</button>
         </div>
       </header>
 
-      <!-- 2A. Isometric Hybrid 3D Hogwarts Castle / Grounds Stage -->
+      <!-- 2A. 2.5D Isometric Hogwarts Castle / Grounds Stage -->
       <section id="world-stage" class="world-stage" aria-label="Khu vực phép thuật">
         <div class="area-banner">
           <button type="button" id="btn-area-prev" aria-label="Khu vực trước">◀</button>
@@ -151,6 +113,25 @@
         <div class="world-canvas-wrap">
           <canvas id="world-canvas" tabindex="0" aria-label="Bản đồ thế giới phép thuật — Kéo để di chuyển, chạm cổ vật để khôi phục"></canvas>
         </div>
+
+        <div class="world-zoom-pill" role="group" aria-label="Thu phóng bản đồ">
+          <button type="button" class="world-zoom-btn" id="btn-map-zoom-out" title="Thu nhỏ bản đồ" aria-label="Thu nhỏ bản đồ">−</button>
+          <button type="button" class="world-zoom-btn" id="btn-map-overview" title="Xem toàn cảnh 9 điểm trang trí">🗺️ Toàn Cảnh</button>
+          <button type="button" class="world-zoom-btn" id="btn-map-zoom-in" title="Phóng to bản đồ" aria-label="Phóng to bản đồ">+</button>
+        </div>
+
+        <aside class="world-side-rail" aria-label="Tính năng trực tuyến &amp; sự kiện">
+          <button type="button" class="world-rail-btn" id="btn-open-online" title="Hội Nhà Hogwarts &amp; Thăm Vườn Online" aria-label="Hội Nhà Hogwarts">
+            🏰 <span class="world-rail-label">Hội Nhà</span>
+            <span id="online-badge" class="notif-badge hidden">0</span>
+          </button>
+          <button type="button" class="world-rail-btn" id="btn-open-events" title="Vé Mùa Giải &amp; Bộ Sưu Tập Thẻ Ếch Sô-cô-la" aria-label="Vé Mùa Giải &amp; Thẻ Ếch">
+            🏆 <span class="world-rail-label">Vé Mùa</span>
+            <span id="events-badge" class="notif-badge hidden">0</span>
+          </button>
+          <button type="button" class="world-rail-btn" id="btn-weather-cycle" title="Đổi thời tiết: Ngày / Đêm Trăng / Tuyết" aria-label="Đổi thời tiết">☀️</button>
+          <button type="button" class="world-rail-btn" id="btn-photo-export" title="Chụp ảnh bưu thiếp Khuôn Viên" aria-label="Chụp ảnh Khuôn Viên">📸</button>
+        </aside>
 
         <div id="visitor-banner" class="visitor-banner hidden" role="region" aria-label="Đang thăm Khuôn viên bạn bè">
           <strong id="visitor-banner-text" style="font-size:0.86rem;">👀 Đang thăm Khuôn viên</strong>
@@ -166,20 +147,17 @@
 
         <div class="world-dock">
           <div class="dock-left">
-            <button type="button" class="btn-playrix btn-gold p25-task-book" id="btn-open-tablet" aria-label="Bản Đồ Phép Thuật">
+            <button type="button" class="btn-playrix btn-gold" id="btn-open-tablet">
               🗺️ <span class="dock-btn-label">Bản Đồ</span><span class="dock-btn-extra"> Phép Thuật</span> <span id="tablet-badge" class="notif-badge hidden">0</span>
             </button>
-            <button type="button" class="btn-playrix btn-purple p25-pin-medallion" id="btn-open-pin" title="Hầm Ngục Gringotts" aria-label="Hầm Ngục Gringotts">
+            <button type="button" class="btn-playrix btn-purple" id="btn-open-pin">
               🔑 <span class="dock-btn-extra">Hầm Ngục </span><span class="dock-btn-label">Gringotts</span> <span id="pin-badge" class="notif-badge hidden">0</span>
             </button>
           </div>
 
-          <button type="button" class="btn-playrix play-level-cta p25-play-orb" id="btn-open-briefing" aria-label="Chơi màn tiếp theo">
-            <span class="p25-play-sphere" aria-hidden="true"><span class="p25-play-tri">▶</span></span>
-            <span class="p25-play-pill">
-              <span id="btn-play-level-num">MÀN 1</span>
-              <small id="btn-play-level-sub">🪄 Niệm Chú Ngay</small>
-            </span>
+          <button type="button" class="btn-playrix play-level-cta" id="btn-open-briefing">
+            <span id="btn-play-level-num">MÀN 1</span>
+            <small id="btn-play-level-sub">🪄 Niệm Chú Ngay</small>
           </button>
         </div>
       </section>
@@ -189,45 +167,45 @@
         <aside class="m3-left-panel">
           <div class="austin-m3-card">
             <img src="/assets/char-austin.webp" alt="Pháp sư Hogwarts" width="48" height="48" loading="lazy" fetchpriority="low" decoding="async" />
-            <div class="m3-companion-caption">
-              <div id="m3-level-label">Màn 1</div>
-              <div id="m3-austin-mood">🧙‍♂️ Vung đũa phép nào!</div>
+            <div>
+              <div id="m3-level-label" style="font-weight:900; font-size:1rem;">Màn 1</div>
+              <div id="m3-austin-mood" style="font-size:0.76rem; font-weight:700; color:#5c4738;">🧙‍♂️ Vung đũa phép nào!</div>
             </div>
           </div>
 
-          <div class="m3-moves-energy-plaque">
-            <div class="moves-box">
-              <div class="moves-num" id="m3-moves-val">22</div>
-              <div class="moves-label">LƯỢT</div>
-            </div>
+          <div class="moves-box">
+            <div class="moves-label" style="font-size:0.74rem; opacity:0.9;">LƯỢT NIỆM CHÚ</div>
+            <div class="moves-num" id="m3-moves-val">22</div>
+          </div>
 
-            <!-- Hogwarts Charge Conic Dial (Time-Turner / Patronus)! -->
-            <div id="garden-rainbow-meter" class="rainbow-meter-card">
-              <div class="rainbow-dial-wrap">
-                <div class="rainbow-dial-ring" id="rainbow-dial-ring">
-                  <img src="/assets/g-rainbow.webp" alt="Patronus Vortex" width="44" height="44" loading="lazy" fetchpriority="low" decoding="async" />
-                </div>
-                <div class="rainbow-pct-pill" id="rainbow-charge-pct">0%</div>
-                <div class="rainbow-title sr-only">THẦN HỘ MỆNH</div>
+          <div class="m3-goals-sec">
+            <div class="m3-sec-label" style="font-weight:800; font-size:0.84rem; text-align:center; margin-bottom:6px;">MỤC TIÊU PHÉP</div>
+            <div class="goals-grid" id="m3-goals-list"></div>
+          </div>
+
+          <!-- Hogwarts Charge Conic Dial (Time-Turner / Patronus)! -->
+          <div id="garden-rainbow-meter" class="rainbow-meter-card">
+            <div class="rainbow-dial-wrap">
+              <div class="rainbow-dial-ring" id="rainbow-dial-ring">
+                <img src="/assets/g-rainbow.webp" alt="Patronus Vortex" width="40" height="40" loading="lazy" fetchpriority="low" decoding="async" />
               </div>
-              <div class="rainbow-bar-track sr-only">
-                <div class="rainbow-bar-fill" id="rainbow-charge-fill"></div>
+              <div style="text-align:left;">
+                <div class="rainbow-title" style="font-size:0.74rem; font-weight:800;">THẦN HỘ MỆNH</div>
+                <div style="font-size:1.1rem; font-weight:900; color:#ffd166;" id="rainbow-charge-pct">0%</div>
               </div>
             </div>
+            <div class="rainbow-bar-track">
+              <div class="rainbow-bar-fill" id="rainbow-charge-fill"></div>
+            </div>
+          </div>
+
+          <div class="m3-score-row" style="text-align:center; font-size:0.84rem; font-weight:800;">
+            Điểm Phép: <span id="m3-score-val">0</span>
           </div>
         </aside>
 
-        <div class="m3-board-column">
-          <div class="m3-top-goals-bar">
-            <div class="m3-score-row">SCORE: <span id="m3-score-val">0</span></div>
-            <div class="m3-goals-sec">
-              <span class="m3-sec-label">MỤC TIÊU</span>
-              <div class="goals-grid" id="m3-goals-list"></div>
-            </div>
-          </div>
-          <div class="m3-canvas-wrap">
-            <canvas id="match3-canvas"></canvas>
-          </div>
+        <div class="m3-canvas-wrap">
+          <canvas id="match3-canvas"></canvas>
         </div>
 
         <aside class="m3-boosters-col" id="m3-boosters-col" aria-label="Trợ thủ trong màn"></aside>

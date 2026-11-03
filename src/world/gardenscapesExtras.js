@@ -145,7 +145,6 @@ export function tryHandleActorTap(renderer, clientX, clientY, radiusScale = 1) {
     const lines = renderer.isCastle ? CASTLE_WIZARD_TAP_LINES : WIZARD_TAP_LINES;
     renderer._tapLineIdx = ((renderer._tapLineIdx || 0) + 1) % lines.length;
     renderer.austinLine = lines[renderer._tapLineIdx];
-    renderer.austinTimer = 4.0;
     renderer.triggerStylePreviewPop(null, austin.x, austin.y - 36 * scale);
     return true;
   }
@@ -157,37 +156,10 @@ export function tryHandleActorTap(renderer, clientX, clientY, radiusScale = 1) {
     renderer.austinLine = renderer.isCastle
       ? `🦉 ${renderer.petName} vỗ cánh tuyết trắng mang thư sáp đỏ Hogwarts chào bạn kìa!`
       : `🐾 ${renderer.petName} hớn hở tung đồng xu Galleon lấp lánh chào bạn kìa!`;
-    renderer.austinTimer = 4.0;
     renderer.triggerStylePreviewPop(null, pet.x, pet.y - 20 * scale);
     return true;
   }
   return false;
-}
-
-export function computeWanderingPetWorld3D(baseWorld, hotspots, timeSec) {
-  const doneSpots = (hotspots || []).filter((h) => h.completed && typeof h.wx === 'number' && (h.wy || 0) < 40);
-  const waypoints = [
-    baseWorld,
-    ...doneSpots.slice(0, 7).map((h) => ({ x: h.wx + 28, z: h.wz + 26 })),
-  ];
-  let wx = baseWorld.x;
-  let wz = baseWorld.z;
-  if (waypoints.length > 1) {
-    const legDur = 5.5;
-    const total = waypoints.length;
-    const cyc = (timeSec / legDur) % total;
-    const idx = Math.floor(cyc);
-    const frac = cyc - idx;
-    const moveT = frac < 0.35 ? 0 : 0.5 - 0.5 * Math.cos(((frac - 0.35) / 0.65) * Math.PI);
-    const a = waypoints[idx];
-    const b = waypoints[(idx + 1) % total];
-    wx = a.x + (b.x - a.x) * moveT;
-    wz = a.z + (b.z - a.z) * moveT;
-  }
-  return {
-    x: wx + Math.sin(timeSec * 1.35) * 11,
-    z: wz + Math.cos(timeSec * 2.1) * 8,
-  };
 }
 
 export function computeWanderingPetPos(basePt, hotspots, sc, timeSec, petHop = 0) {
@@ -253,73 +225,5 @@ export function exportWorldSnapshotPng(canvas, fileLabel = 'khuon-vien-hogwarts'
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 2500);
   }, 'image/png');
-}
-
-export function shouldShowHotspotPin(renderer, hs, isPreview) {
-  return !hs.completed || Boolean(renderer.designMode) || Boolean(isPreview);
-}
-
-export function updateWorldHoldRing(renderer, clientX, clientY, progress, pointerType = 'mouse') {
-  if (!progress || progress <= 0 || renderer.readOnlyVisitor) {
-    renderer.holdRing = null;
-    return;
-  }
-  const hs = renderer._findHotspotAt(clientX, clientY, pointerType);
-  if (!hs || !hs.completed) {
-    renderer.holdRing = null;
-    return;
-  }
-  renderer.holdRing = { x: hs.x, y: hs.y - 16, progress };
-}
-
-export function handleWorldLongPress(renderer, clientX, clientY, pointerType = 'mouse') {
-  renderer.holdRing = null;
-  if (renderer.readOnlyVisitor) return false;
-  const hs = renderer._findHotspotAt(clientX, clientY, pointerType);
-  if (!hs) return false;
-  sound.sfxClick();
-  haptics.tap();
-  renderer.triggerStylePreviewPop?.(hs.task.slot, hs.x, hs.y);
-  renderer.onSlotClick(hs.task, hs.completed);
-  return true;
-}
-
-export function handleWorldHotspotTap(renderer, hs) {
-  if (!hs.completed || renderer.designMode || renderer.previewOverride) {
-    renderer.onSlotClick(hs.task, hs.completed);
-    return;
-  }
-  sound.sfxClick();
-  renderer.triggerStylePreviewPop?.(hs.task.slot, hs.x, hs.y);
-  renderer.austinLine = '🎨 Nhấn giữ 0.4s vào cổ vật (hoặc bật nút 🎨 góc phải) để đổi 3 phong cách nhé!';
-}
-
-export function drawLongPressRing(ctx, holdRing, sc = 1) {
-  if (!holdRing || holdRing.progress <= 0) return;
-  const r = Math.max(24, 30 * sc);
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(holdRing.x, holdRing.y, r, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(16, 28, 20, 0.55)';
-  ctx.fill();
-  ctx.lineWidth = 4.5;
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.28)';
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.arc(holdRing.x, holdRing.y, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * holdRing.progress);
-  ctx.strokeStyle = '#ffd166';
-  ctx.lineCap = 'round';
-  ctx.lineWidth = 5.5;
-  ctx.shadowColor = '#ffd166';
-  ctx.shadowBlur = 10;
-  ctx.stroke();
-
-  ctx.shadowBlur = 0;
-  ctx.font = `${Math.round(18 * sc)}px system-ui`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('🎨', holdRing.x, holdRing.y + 1);
-  ctx.restore();
 }
 

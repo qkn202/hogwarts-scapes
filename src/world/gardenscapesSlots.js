@@ -169,24 +169,20 @@ function drawMagicalWaterArcs(ctx, x, y, sc, timeSec, style) {
   ctx.restore();
 }
 
-export function prepareGardenGroundAndHotspots(renderer, ctx, area, scene, sc, timeSec, skip2DGround = false) {
+export function renderGardenZoneSlots(renderer, ctx, area, scene, sc, timeSec) {
   const zoneMod = (area.sceneIndex ?? renderer.areaIndex) % GARDEN_ANCHORS.length;
   const anchors = GARDEN_ANCHORS[zoneMod] || GARDEN_ANCHORS[0];
   const relicMap = ZONE_RELIC_PROPS[zoneMod] || ZONE_RELIC_PROPS[0];
 
   const addSpot = (task, done) => {
     const [nx, ny] = anchors[task.slot] || [0.5, 0.6];
-    const wPos = scene.isFull3D ? scene.normToWorld(nx, ny, 0, task.slot) : null;
-    const p = wPos ? scene.projectWorld(wPos.x, wPos.y, wPos.z) : scene.pt(nx, ny);
+    const p = scene.pt(nx, ny);
     renderer.hotspots.push({
       task,
       nx,
       ny,
       x: p.x,
       y: p.y,
-      wx: wPos?.x,
-      wy: wPos?.y || 0,
-      wz: wPos?.z,
       pinY: p.y - 24 * sc,
       r: Math.max(30, 41 * sc),
       completed: done,
@@ -198,14 +194,13 @@ export function prepareGardenGroundAndHotspots(renderer, ctx, area, scene, sc, t
   const pathTask = area.tasks.find((t) => t.slot === 'path');
   const pathSt = renderer._getTaskStyle(pathTask);
   const pathPt = addSpot(pathTask, pathSt.done);
-  if (!skip2DGround) {
-    if (pathSt.done) {
-      drawHogwartsRuneCircle(ctx, pathPt.x, pathPt.y, sc, timeSec, pathSt.styleIdx, pathSt.style, pathSt.preview);
-    } else {
-      drawDormantRuneSeal(ctx, pathPt.x, pathPt.y, sc, timeSec);
-    }
+  if (pathSt.done) {
+    drawHogwartsRuneCircle(ctx, pathPt.x, pathPt.y, sc, timeSec, pathSt.styleIdx, pathSt.style, pathSt.preview);
+  } else {
+    drawDormantRuneSeal(ctx, pathPt.x, pathPt.y, sc, timeSec);
   }
 
+  // 2–9. Render all 8 3D Relics & Wing Landmarks sorted back-to-front by Y!
   const orderedSlots = ['flora', 'seating', 'lighting', 'centerpiece', 'special', 'fountain_wing', 'guardian', 'pavilion']
     .map((slot) => {
       const task = area.tasks.find((t) => t.slot === slot);
@@ -217,29 +212,12 @@ export function prepareGardenGroundAndHotspots(renderer, ctx, area, scene, sc, t
     .filter(Boolean)
     .sort((a, b) => a.pt.y - b.pt.y);
 
-  // Ground plinths & dormant rune seals (2.5D fallback only)
-  if (!skip2DGround) {
-    for (const { st, pt, spec } of orderedSlots) {
-      if (!spec) continue;
-      if (st.done && spec.vfx === 'plinth') {
+  for (const { st, pt, spec } of orderedSlots) {
+    if (!spec) continue;
+    if (st.done) {
+      if (spec.vfx === 'plinth') {
         drawIsoDiamond(ctx, pt.x, pt.y + 18 * sc, 36 * sc, 16 * sc, st.style?.secondary || '#1d3557', st.style?.primary || '#ffd166');
-      } else if (!st.done && spec.vfx !== 'boat') {
-        drawDormantRuneSeal(ctx, pt.x, pt.y + 8 * sc, sc * 0.68, timeSec);
       }
-    }
-  }
-
-  return orderedSlots;
-}
-
-export function renderGardenZoneSlots(renderer, ctx, area, scene, sc, timeSec, rendered3DIds = null, preOrdered = null) {
-  const orderedSlots = preOrdered || prepareGardenGroundAndHotspots(renderer, ctx, area, scene, sc, timeSec);
-
-  for (const { task, st, pt, spec } of orderedSlots) {
-    if (!spec || !st.done) continue;
-    const has3D = Boolean(rendered3DIds && rendered3DIds.has(task.id));
-
-    if (!has3D) {
       if (spec.vfx === 'boat') {
         drawEnchantedLakeBoat(ctx, pt.x, pt.y, sc, timeSec, st);
       } else if (spec.vfx === 'willow_shrine') {
@@ -248,6 +226,7 @@ export function renderGardenZoneSlots(renderer, ctx, area, scene, sc, timeSec, r
           preview: st.preview,
           timeSec,
         });
+        drawWillowSpiritCascade(ctx, pt.x, pt.y - 46 * sc, sc, timeSec, st.style);
       } else if (spec.key) {
         drawStyledPropSprite(ctx, spec.key, pt.x, pt.y, spec.size * sc, st.styleIdx, {
           flipX: Boolean(spec.flipX),
@@ -257,20 +236,18 @@ export function renderGardenZoneSlots(renderer, ctx, area, scene, sc, timeSec, r
         if (spec.lamp) {
           drawStyledPropSprite(ctx, 'g_prop_lamp', pt.x + 36 * sc, pt.y - 12 * sc, 94 * sc, st.styleIdx, { timeSec });
         }
+        if (spec.vfx === 'pensieve') {
+          drawPensieveWisps(ctx, pt.x, pt.y - 34 * sc, sc, timeSec, st.style.primary);
+        } else if (spec.vfx === 'candles') {
+          drawCandleSparkles(ctx, pt.x, pt.y - 36 * sc, sc, timeSec, st.style.primary, st.style.accent);
+        } else if (spec.vfx === 'sparks') {
+          drawTriwizardAura(ctx, pt.x, pt.y - 26 * sc, sc, timeSec, st.style.primary);
+        } else if (spec.vfx === 'water_arcs') {
+          drawMagicalWaterArcs(ctx, pt.x, pt.y, sc, timeSec, st.style);
+        }
       }
-    }
-
-    // Magical atmospheric VFX sparkle over both 3D GLB relics & 2.5D fallback sprites!
-    if (spec.vfx === 'willow_shrine') {
-      drawWillowSpiritCascade(ctx, pt.x, pt.y - 46 * sc, sc, timeSec, st.style);
-    } else if (spec.vfx === 'pensieve') {
-      drawPensieveWisps(ctx, pt.x, pt.y - 34 * sc, sc, timeSec, st.style.primary);
-    } else if (spec.vfx === 'candles') {
-      drawCandleSparkles(ctx, pt.x, pt.y - 36 * sc, sc, timeSec, st.style.primary, st.style.accent);
-    } else if (spec.vfx === 'sparks') {
-      drawTriwizardAura(ctx, pt.x, pt.y - 26 * sc, sc, timeSec, st.style.primary);
-    } else if (spec.vfx === 'water_arcs') {
-      drawMagicalWaterArcs(ctx, pt.x, pt.y, sc, timeSec, st.style);
+    } else if (spec.vfx !== 'boat') {
+      drawDormantRuneSeal(ctx, pt.x, pt.y + 8 * sc, sc * 0.68, timeSec);
     }
   }
 }

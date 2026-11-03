@@ -20,16 +20,13 @@ export function applyPlayerHouseChange(app, rawHouse) {
   const hMeta = HOGWARTS_HOUSES.find((h) => h.id === house) || HOGWARTS_HOUSES[0];
   const roomMeta = HOUSE_COMMON_ROOM_META[house];
 
-  if (!app.visitingGarden) {
-    app.gardenRenderer?.setState({ house });
-    if (app.gameId === 'homescapes') {
-      app.homeRenderer.setState({
-        house,
-        austinLine: `${hMeta.crest} Chào mừng về ${roomMeta.name}! Mọi huy hiệu & nội thất mặc định đã đổi theo Nhà ${hMeta.name}!`,
-      });
-      if (prev !== house && app.screen === 'world') {
-        spawnCelebrationFireworks(app.homeRenderer);
-      }
+  if (!app.visitingGarden && app.gameId === 'homescapes') {
+    app.homeRenderer.setState({
+      house,
+      austinLine: `${hMeta.crest} Chào mừng về ${roomMeta.name}! Mọi huy hiệu & nội thất mặc định đã đổi theo Nhà ${hMeta.name}!`,
+    });
+    if (prev !== house && app.screen === 'world') {
+      spawnCelebrationFireworks(app.homeRenderer);
     }
   }
 

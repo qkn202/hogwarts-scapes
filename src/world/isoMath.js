@@ -236,44 +236,42 @@ export function drawStyledPropSprite(ctx, spriteKey, x, y, sizePx, styleIdx = 0,
 /**
  * Draws Full-Body Standing 3D Austin the Butler anchored at his feet (x, y) with 2-line speech bubble!
  */
-export function drawAustin(ctx, x, y, scale = 1, timeSec = 0, isGarden = false, bubbleText = '', skipBody = false) {
+export function drawAustin(ctx, x, y, scale = 1, timeSec = 0, isGarden = false, bubbleText = '') {
   ctx.save();
   ctx.translate(x, y);
 
+  // Ground contact shadow right beneath Austin's shoes
+  ctx.fillStyle = 'rgba(15, 10, 6, 0.32)';
+  ctx.beginPath();
+  ctx.ellipse(0, 2 * scale, 22 * scale, 8 * scale, 0, 0, Math.PI * 2);
+  ctx.fill();
+
   const fullKey = isGarden ? 'austin_full_garden' : 'austin_full_home';
-  const isFull = Boolean(sprites.get(fullKey)) || skipBody;
+  const img = sprites.get(fullKey) || sprites.get('austin');
+  const isFull = Boolean(sprites.get(fullKey));
 
-  if (!skipBody) {
-    // Ground contact shadow right beneath Austin's shoes
-    ctx.fillStyle = 'rgba(15, 10, 6, 0.32)';
-    ctx.beginPath();
-    ctx.ellipse(0, 2 * scale, 22 * scale, 8 * scale, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    const img = sprites.get(fullKey) || sprites.get('austin');
-    if (img) {
-      const sz = (isFull ? 132 : 88) * scale;
-      const breathe = 1 + Math.sin(timeSec * 3.0) * 0.018;
-      const sway = Math.sin(timeSec * 2.1) * 0.018;
-      ctx.save();
-      ctx.rotate(sway);
-      ctx.scale(1, breathe);
-      if (isFull) {
-        ctx.drawImage(img, -sz * 0.5, -sz * 0.96, sz, sz);
-      } else {
-        ctx.drawImage(img, -sz * 0.5, -sz * 0.85, sz, sz);
-      }
-      ctx.restore();
+  if (img) {
+    const sz = (isFull ? 132 : 88) * scale;
+    const breathe = 1 + Math.sin(timeSec * 3.0) * 0.018;
+    const sway = Math.sin(timeSec * 2.1) * 0.018;
+    ctx.save();
+    ctx.rotate(sway);
+    ctx.scale(1, breathe);
+    if (isFull) {
+      ctx.drawImage(img, -sz * 0.5, -sz * 0.96, sz, sz);
     } else {
-      ctx.fillStyle = isGarden ? '#2d6a4f' : '#3a5a40';
-      ctx.beginPath();
-      ctx.arc(0, -34 * scale, 22 * scale, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.drawImage(img, -sz * 0.5, -sz * 0.85, sz, sz);
     }
+    ctx.restore();
+  } else {
+    ctx.fillStyle = isGarden ? '#2d6a4f' : '#3a5a40';
+    ctx.beginPath();
+    ctx.arc(0, -34 * scale, 22 * scale, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   if (bubbleText) {
-    drawSpeechBubble(ctx, 0, -(isFull ? 126 : 84) * scale, bubbleText, isGarden);
+    drawSpeechBubble(ctx, 0, -(isFull ? 130 : 84) * scale, bubbleText, isGarden);
   }
   ctx.restore();
 }
@@ -281,27 +279,25 @@ export function drawAustin(ctx, x, y, scale = 1, timeSec = 0, isGarden = false, 
 /**
  * Draws 3D Ginger Cat (Homescapes) or Golden Retriever Puppy (Gardenscapes) sprite!
  */
-export function drawPet(ctx, x, y, isPuppy, timeSec = 0, petName = '', scale = 1, skipBody = false) {
+export function drawPet(ctx, x, y, isPuppy, timeSec = 0, petName = '', scale = 1) {
   ctx.save();
   const hop = Math.abs(Math.sin(timeSec * 4.2)) * (isPuppy ? 4.5 : 2.0);
   ctx.translate(x, y - hop);
 
-  if (!skipBody) {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.24)';
-    ctx.beginPath();
-    ctx.ellipse(0, 18 * scale + hop, 20 * scale, 7.5 * scale, 0, 0, Math.PI * 2);
-    ctx.fill();
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.24)';
+  ctx.beginPath();
+  ctx.ellipse(0, 18 * scale + hop, 20 * scale, 7.5 * scale, 0, 0, Math.PI * 2);
+  ctx.fill();
 
-    const img = sprites.get(isPuppy ? 'puppy' : 'cat');
-    if (img) {
-      const sz = 68 * scale;
-      ctx.drawImage(img, -sz / 2, -sz * 0.68, sz, sz);
-    } else {
-      ctx.fillStyle = isPuppy ? '#f4a261' : '#f77f00';
-      ctx.beginPath();
-      ctx.arc(0, 0, 14 * scale, 0, Math.PI * 2);
-      ctx.fill();
-    }
+  const img = sprites.get(isPuppy ? 'puppy' : 'cat');
+  if (img) {
+    const sz = 68 * scale;
+    ctx.drawImage(img, -sz / 2, -sz * 0.68, sz, sz);
+  } else {
+    ctx.fillStyle = isPuppy ? '#f4a261' : '#f77f00';
+    ctx.beginPath();
+    ctx.arc(0, 0, 14 * scale, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   if (petName) {

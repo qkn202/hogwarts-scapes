@@ -9,25 +9,15 @@
 import { getHomescapesAreasForTier } from '../data/homescapesStory.js';
 import { normalizeHogwartsHouse } from '../data/houseCommonRooms.js';
 import { sprites } from '../utils/spriteLoader.js';
-import { isGraphics3dEnabled } from '../world3d/sharedWebgl.js';
-import { getWorld3DStage } from '../world3d/world3dStage.js';
 import {
   computeWanderingPetPos,
-  computeWanderingPetWorld3D,
-  drawLongPressRing,
   drawReparoSpellBeam,
   drawWeatherAtmosphere,
-  handleWorldHotspotTap,
-  handleWorldLongPress,
-  shouldShowHotspotPin,
   tryHandleActorTap,
-  updateWorldHoldRing,
 } from './gardenscapesExtras.js';
 import {
   ROOM_ANCHORS,
   drawCornerCobwebs,
-  getCastleSlotScreenAndWorld,
-  prepareCastleGroundAndHotspots,
   renderCastleRoomSlots,
 } from './homescapesVfx.js';
 import {
@@ -74,14 +64,12 @@ export class HomescapesWorldRenderer {
         if (!this.readOnlyVisitor) {
           const hs = this._findHotspotAt(clientX, clientY, pointerType);
           if (hs) {
-            handleWorldHotspotTap(this, hs);
+            this.onSlotClick(hs.task, hs.completed);
             return;
           }
         }
         tryHandleActorTap(this, clientX, clientY);
       },
-      onLongPress: (clientX, clientY, pointerType) => handleWorldLongPress(this, clientX, clientY, pointerType),
-      onHoldProgress: (clientX, clientY, prog, pointerType) => updateWorldHoldRing(this, clientX, clientY, prog, pointerType),
       onHover: (clientX, clientY) => {
         const hs = this.readOnlyVisitor ? null : this._findHotspotAt(clientX, clientY, 'mouse');
         this.hoveredTaskId = hs ? hs.task.id : null;
@@ -106,16 +94,11 @@ export class HomescapesWorldRenderer {
     if (weather) this.weather = weather;
     if (readOnlyVisitor !== undefined) this.readOnlyVisitor = Boolean(readOnlyVisitor);
     this.previewOverride = previewOverride;
-    if (austinLine !== null) {
-      this.austinLine = austinLine;
-      this.austinTimer = austinLine ? 4.2 : 0;
-    }
+    if (austinLine !== null) this.austinLine = austinLine;
 
     const activeArea = this._getActiveArea();
-    if (!isGraphics3dEnabled()) {
-      const sIdx = (activeArea.sceneIndex ?? this.areaIndex) % 6;
-      sprites.ensure(activeArea.sceneKey || `home_room_${sIdx}`, 'high');
-    }
+    const sIdx = (activeArea.sceneIndex ?? this.areaIndex) % 6;
+    sprites.ensure(activeArea.sceneKey || `home_room_${sIdx}`, 'high');
 
     if (this.areaIndex !== prevArea || this.readOnlyVisitor !== prevVisitor) {
       this._focusedArea = this.areaIndex;
@@ -153,10 +136,7 @@ export class HomescapesWorldRenderer {
   _slotScreenPoint(slot) {
     const anchors = this._getActiveAnchors();
     const [nx, ny] = (slot && anchors[slot]) || [0.5, 0.6];
-    if (this._scene) {
-      const p = getCastleSlotScreenAndWorld(this._scene, slot, nx, ny);
-      return { x: p.x, y: p.y };
-    }
+    if (this._scene) return this._scene.pt(nx, ny);
     return { x: (this.viewW || 800) * nx, y: (this.viewH || 520) * ny };
   }
 
@@ -179,13 +159,9 @@ export class HomescapesWorldRenderer {
   }
 
   triggerRenovationBurst(slot = null) {
-    const anchors = this._getActiveAnchors();
-    const [nx, ny] = (slot && anchors[slot]) || [0.5, 0.6];
-    const sp = this._scene ? getCastleSlotScreenAndWorld(this._scene, slot, nx, ny) : this._slotScreenPoint(slot);
-    const { x: tx, y: ty } = sp;
-    const worldTarget = sp.wx !== undefined ? { x: sp.wx, y: sp.wy || 0, z: sp.wz } : null;
+    const { x: tx, y: ty } = this._slotScreenPoint(slot);
     this.starArc = { x1: 68, y1: 28, x2: tx, y2: ty, t: 0 };
-    this.spellCast = { slot, tx, ty, worldTarget, t: 0, duration: 1.35 };
+    this.spellCast = { slot, tx, ty, t: 0, duration: 1.35 };
     for (let i = 0; i < 48; i++) {
       const ang = Math.random() * Math.PI * 2;
       const spd = 48 + Math.random() * 170;
@@ -206,7 +182,7 @@ export class HomescapesWorldRenderer {
     this.running = true;
     const area = this._getActiveArea();
     const sIdx = (area.sceneIndex ?? this.areaIndex) % 6;
-    sprites.preloadForGame('homescapes', isGraphics3dEnabled() ? null : (area.sceneKey || `home_room_${sIdx}`));
+    sprites.preloadForGame('homescapes', area.sceneKey || `home_room_${sIdx}`);
     this.resize();
     let last = performance.now();
     const loop = (now) => {
@@ -287,10 +263,6 @@ export class HomescapesWorldRenderer {
   _update(dt) {
     this.camera.update(dt);
     if (this.petHop > 0) this.petHop = Math.max(0, this.petHop - dt * 2.2);
-    if (this.austinTimer > 0) {
-      this.austinTimer = Math.max(0, this.austinTimer - dt);
-      if (this.austinTimer <= 0 && !this.previewOverride) this.austinLine = '';
-    }
     if (this.spellCast) {
       this.spellCast.t += dt;
       if (this.spellCast.slot) {
@@ -320,136 +292,77 @@ export class HomescapesWorldRenderer {
     const area = this._getActiveArea();
     const roomMod = (area.sceneIndex ?? this.areaIndex) % ROOM_ANCHORS.length;
     const anchors = ROOM_ANCHORS[roomMod] || ROOM_ANCHORS[0];
+    const sceneKey = area.sceneKey || `home_room_${roomMod}`;
+    const [fbTop, fbBtm] = area.fallbackBg || ['#3b1c26', '#1c0d13'];
 
-    const stage3D = getWorld3DStage('homescapes');
-    const scene3D = stage3D.prepareSceneFrame(this, w, h, true);
-
-    let sc;
-    let ax;
-    let ay;
-    let px;
-    let py;
-    let pass3D = { active: false, renderedTaskIds: null, prefectReady: false, petReady: false };
-
-    if (scene3D) {
-      this._scene = scene3D;
-      sc = scene3D.scale;
-      this.hotspots = [];
-      prepareCastleGroundAndHotspots(this, ctx, area, scene3D, sc, timeSec, true);
-
-      const floorTask = area.tasks.find((t) => t.slot === 'floor');
-      const floorSt = this._getTaskStyle(floorTask);
-      const floorW = scene3D.normToWorld(anchors.floor[0], anchors.floor[1], 0, 'floor');
-      const medallionSpec = {
-        isCastle: true,
-        done: floorSt.done,
-        styleIdx: floorSt.styleIdx,
-        primary: floorSt.style?.primary || '#c68b59',
-        secondary: floorSt.style?.secondary || '#9b2226',
-        accent: floorSt.style?.accent || '#ffd166',
-        worldX: floorW.x,
-        worldZ: floorW.z,
-      };
-
-      const baseAW = scene3D.normToWorld(anchors.austin[0], anchors.austin[1], 0, 'austin');
-      const austinWorld = { x: baseAW.x, z: baseAW.z };
-      if (this.spellCast?.worldTarget) {
-        const walkAmt = Math.sin(Math.min(1, this.spellCast.t / this.spellCast.duration) * Math.PI) * 0.34;
-        austinWorld.x += (this.spellCast.worldTarget.x - austinWorld.x) * walkAmt;
-        austinWorld.z += (this.spellCast.worldTarget.z - austinWorld.z) * walkAmt;
-      }
-      const basePW = scene3D.normToWorld(anchors.pet[0], anchors.pet[1], 0, 'pet');
-      const petWorld = computeWanderingPetWorld3D(basePW, this.hotspots, timeSec);
-
-      pass3D = stage3D.renderPass(this, area, scene3D, timeSec, {
-        envIdx: roomMod,
-        austinWorld,
-        petWorld,
-        medallionSpec,
-      });
-
-      const aScr = scene3D.projectWorld(austinWorld.x, 0, austinWorld.z);
-      const pScr = scene3D.projectWorld(petWorld.x, 0, petWorld.z);
-      ax = aScr.x;
-      ay = aScr.y;
-      px = pScr.x;
-      py = pScr.y;
-
-      renderCastleRoomSlots(this, ctx, area, scene3D, sc, timeSec, pass3D.renderedTaskIds, true);
-    } else {
-      const sceneKey = area.sceneKey || `home_room_${roomMod}`;
-      const [fbTop, fbBtm] = area.fallbackBg || ['#3b1c26', '#1c0d13'];
-      const scene = drawSceneBackdrop(
-        ctx,
-        w,
-        h,
-        sceneKey,
-        fbTop,
-        fbBtm,
-        this.camera,
-        `home_room_${roomMod % 4}`
-      );
-      this._scene = scene;
-      sc = scene.scale;
-      if (area.accentTint) {
-        ctx.fillStyle = area.accentTint;
-        ctx.fillRect(0, 0, w, h);
-      }
-      const floorTask = area.tasks.find((t) => t.slot === 'floor');
-      const floorSt = this._getTaskStyle(floorTask);
-      if (!floorSt.done) {
-        ctx.fillStyle = 'rgba(38, 26, 20, 0.24)';
-        ctx.fillRect(0, 0, w, h);
-        drawCornerCobwebs(ctx, scene, sc);
-      } else if (floorSt.style) {
-        ctx.save();
-        ctx.globalAlpha = 0.06;
-        ctx.fillStyle = floorSt.style.primary;
-        ctx.fillRect(0, 0, w, h);
-        ctx.restore();
-      }
-      this.hotspots = [];
-      prepareCastleGroundAndHotspots(this, ctx, area, scene, sc, timeSec, false);
-
-      const baseAustin = scene.pt(anchors.austin[0], anchors.austin[1]);
-      ax = baseAustin.x;
-      ay = baseAustin.y;
-      if (this.spellCast) {
-        const walkAmt = Math.sin(Math.min(1, this.spellCast.t / this.spellCast.duration) * Math.PI) * 0.36;
-        ax += (this.spellCast.tx - ax) * walkAmt;
-        ay += (this.spellCast.ty - ay) * walkAmt;
-      }
-      const pPt = scene.pt(anchors.pet[0], anchors.pet[1]);
-      const pPos = computeWanderingPetPos(pPt, this.hotspots, sc, timeSec, this.petHop);
-      px = pPos.x;
-      py = pPos.y;
-
-      renderCastleRoomSlots(this, ctx, area, scene, sc, timeSec, null, true);
-      ctx.fillStyle = 'rgba(255, 244, 189, 0.55)';
-      for (let m = 0; m < 10; m++) {
-        const mx = w * (0.25 + ((m * 0.07) % 0.55)) + Math.sin(timeSec * 0.8 + m) * 18;
-        const my = h * (0.22 + ((m * 0.06) % 0.5)) + Math.cos(timeSec * 0.6 + m * 1.7) * 14;
-        ctx.beginPath();
-        ctx.arc(mx, my, 2.2 * sc, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      drawWeatherAtmosphere(ctx, w, h, sc, timeSec, this.weather);
+    const scene = drawSceneBackdrop(
+      ctx,
+      w,
+      h,
+      sceneKey,
+      fbTop,
+      fbBtm,
+      this.camera,
+      `home_room_${roomMod % 4}`
+    );
+    this._scene = scene;
+    const sc = scene.scale;
+    if (area.accentTint) {
+      ctx.fillStyle = area.accentTint;
+      ctx.fillRect(0, 0, w, h);
     }
+
+    const floorTask = area.tasks.find((t) => t.slot === 'floor');
+    const floorSt = this._getTaskStyle(floorTask);
+    if (!floorSt.done) {
+      ctx.fillStyle = 'rgba(38, 26, 20, 0.24)';
+      ctx.fillRect(0, 0, w, h);
+      drawCornerCobwebs(ctx, scene, sc);
+    } else if (floorSt.style) {
+      ctx.save();
+      ctx.globalAlpha = 0.06;
+      ctx.fillStyle = floorSt.style.primary;
+      ctx.fillRect(0, 0, w, h);
+      ctx.restore();
+    }
+
+    this.hotspots = [];
+    renderCastleRoomSlots(this, ctx, area, scene, sc, timeSec);
+
+    // Ambient Dust Motes + Castle Weather Atmosphere (Day / Starry Night / Great Hall Snow)
+    ctx.fillStyle = 'rgba(255, 244, 189, 0.55)';
+    for (let m = 0; m < 10; m++) {
+      const mx = w * (0.25 + ((m * 0.07) % 0.55)) + Math.sin(timeSec * 0.8 + m) * 18;
+      const my = h * (0.22 + ((m * 0.06) % 0.5)) + Math.cos(timeSec * 0.6 + m * 1.7) * 14;
+      ctx.beginPath();
+      ctx.arc(mx, my, 2.2 * sc, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    drawWeatherAtmosphere(ctx, w, h, sc, timeSec, this.weather);
 
     // Interactive Pin Badges (hidden when visiting a friend's Castle!)
     if (!this.readOnlyVisitor) {
       for (const hs of this.hotspots) {
         const isPrev = Boolean(this.previewOverride && this.previewOverride.taskId === hs.task.id);
-        if (shouldShowHotspotPin(this, hs, isPrev)) {
-          drawHotspotPin(ctx, hs, isPrev, timeSec, sc, false, this.hoveredTaskId === hs.task.id);
-        }
+        drawHotspotPin(ctx, hs, isPrev, timeSec, sc, false, this.hoveredTaskId === hs.task.id);
       }
-      drawLongPressRing(ctx, this.holdRing, sc);
     }
 
+    // Standing 3D Castle Wizard + Hedwig + Reparo Spell Beam!
+    const baseAustin = scene.pt(anchors.austin[0], anchors.austin[1]);
+    let ax = baseAustin.x;
+    let ay = baseAustin.y;
+    if (this.spellCast) {
+      const walkAmt = Math.sin(Math.min(1, this.spellCast.t / this.spellCast.duration) * Math.PI) * 0.36;
+      ax += (this.spellCast.tx - ax) * walkAmt;
+      ay += (this.spellCast.ty - ay) * walkAmt;
+    }
     drawReparoSpellBeam(ctx, this.spellCast, { x: ax, y: ay }, sc, timeSec);
-    drawAustin(ctx, ax, ay, sc * 1.05, timeSec, false, this.austinLine, pass3D.prefectReady);
-    drawPet(ctx, px, py, false, timeSec, pass3D.petReady && this.petHop <= 0 ? '' : this.petName, sc * 1.02, pass3D.petReady);
+    drawAustin(ctx, ax, ay, sc * 1.05, timeSec, false, this.austinLine);
+
+    const pPt = scene.pt(anchors.pet[0], anchors.pet[1]);
+    const { x: px, y: py } = computeWanderingPetPos(pPt, this.hotspots, sc, timeSec, this.petHop);
+    drawPet(ctx, px, py, false, timeSec, this.petName, sc * 1.02);
     this._lastActors = { austin: { x: ax, y: ay }, pet: { x: px, y: py }, scale: sc };
 
     if (!this.readOnlyVisitor) {

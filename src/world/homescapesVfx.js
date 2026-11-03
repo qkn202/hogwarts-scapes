@@ -256,91 +256,37 @@ export function drawCornerCobwebs(ctx, scene, sc) {
   ctx.restore();
 }
 
-export function getCastleSlotScreenAndWorld(scene, slot, nx, ny) {
-  if (!scene?.isFull3D) {
-    const p = scene.pt(nx, ny);
-    return { x: p.x, y: p.y, wx: undefined, wy: 0, wz: undefined };
-  }
-  if (slot === 'curtain') {
-    const cw = scene.normToWorld(0.5, 0.21, 0, 'curtain_ceiling');
-    const p = scene.projectWorld(cw.x, 195, cw.z);
-    return { x: p.x, y: p.y, wx: cw.x, wy: 195, wz: cw.z };
-  }
-  if (slot === 'banner') {
-    const bw = scene.normToWorld(nx, ny, 0, 'banner');
-    const p = scene.projectWorld(bw.x, 165, bw.z);
-    return { x: p.x, y: p.y, wx: bw.x, wy: 165, wz: bw.z };
-  }
-  const fw = scene.normToWorld(nx, ny, 0, slot);
-  const p = scene.projectWorld(fw.x, fw.y, fw.z);
-  return { x: p.x, y: p.y, wx: fw.x, wy: 0, wz: fw.z };
-}
-
-export function prepareCastleGroundAndHotspots(renderer, ctx, area, scene, sc, timeSec, skip2DGround = false) {
+/**
+ * Draws all 9 3-style renovation slots for the active Hogwarts Castle room and populates hotspots.
+ */
+export function renderCastleRoomSlots(renderer, ctx, area, scene, sc, timeSec) {
   const rawScene = area.sceneIndex ?? renderer.areaIndex;
   const areaIdx = ((rawScene % ROOM_ANCHORS.length) + ROOM_ANCHORS.length) % ROOM_ANCHORS.length;
   const anchors = ROOM_ANCHORS[areaIdx] || ROOM_ANCHORS[0];
-
-  for (const slot of ['floor', 'rug', 'curtain', 'bed', 'desk', 'decor', 'banner', 'alcove', 'hearth']) {
-    const task = area.tasks.find((t) => t.slot === slot);
-    if (!task) continue;
-    const st = renderer._getTaskStyle(task);
-    const [nx, ny] = anchors[slot] || [0.5, 0.6];
-    const p = getCastleSlotScreenAndWorld(scene, slot, nx, ny);
+  const addSpot = (task, done) => {
+    const [nx, ny] = anchors[task.slot] || [0.5, 0.6];
+    const p = scene.pt(nx, ny);
     renderer.hotspots.push({
       task,
       nx,
       ny,
       x: p.x,
       y: p.y,
-      wx: p.wx,
-      wy: p.wy,
-      wz: p.wz,
       pinY: p.y - 24 * sc,
       r: Math.max(32, 42 * sc),
-      completed: st.done,
+      completed: done,
     });
-
-    if (skip2DGround) continue;
-    if (slot === 'floor') {
-      if (st.done) drawCastleFloorInlay(ctx, p.x, p.y, sc, st.styleIdx, st.style, timeSec, st.preview);
-      else drawDustPatch(ctx, p.x, p.y, sc * 1.15);
-    } else if (slot === 'rug' && !st.done) {
-      drawDustPatch(ctx, p.x, p.y, sc * 0.95);
-    } else if (slot === 'hearth' && !st.done) {
-      drawDustPatch(ctx, p.x, p.y + 6 * sc, sc * 0.8);
-    } else if (slot === 'curtain' && st.done && areaIdx === 0) {
-      const winPt = scene.pt(0.64, 0.36);
-      drawWindowSunbeams(ctx, winPt.x, winPt.y, sc, st.style.primary, renderer.weather);
-    }
-  }
-}
-
-/**
- * Draws all 9 3-style renovation slots (or VFX accents over 3D GLB furniture when `rendered3DIds` is active).
- */
-export function renderCastleRoomSlots(renderer, ctx, area, scene, sc, timeSec, rendered3DIds = null, groundPrepared = false) {
-  const rawScene = area.sceneIndex ?? renderer.areaIndex;
-  const areaIdx = ((rawScene % ROOM_ANCHORS.length) + ROOM_ANCHORS.length) % ROOM_ANCHORS.length;
-  const anchors = ROOM_ANCHORS[areaIdx] || ROOM_ANCHORS[0];
-  const has3D = (task) => Boolean(task && rendered3DIds && rendered3DIds.has(task.id));
-  const addSpot = (task, done) => {
-    const [nx, ny] = anchors[task.slot] || [0.5, 0.6];
-    const p = getCastleSlotScreenAndWorld(scene, task.slot, nx, ny);
-    if (!groundPrepared) {
-      renderer.hotspots.push({
-        task, nx, ny, x: p.x, y: p.y, wx: p.wx, wy: p.wy, wz: p.wz, pinY: p.y - 24 * sc, r: Math.max(32, 42 * sc), completed: done,
-      });
-    }
     return p;
   };
 
-  if (!groundPrepared) {
-    const floorTask = area.tasks.find((t) => t.slot === 'floor');
-    const floorSt = renderer._getTaskStyle(floorTask);
-    const floorPt = addSpot(floorTask, floorSt.done);
-    if (floorSt.done) drawCastleFloorInlay(ctx, floorPt.x, floorPt.y, sc, floorSt.styleIdx, floorSt.style, timeSec, floorSt.preview);
-    else drawDustPatch(ctx, floorPt.x, floorPt.y, sc * 1.15);
+  // 1. Floor Inlay Crest / Tilework (3 distinct Hogwarts geometric floor inlays!)
+  const floorTask = area.tasks.find((t) => t.slot === 'floor');
+  const floorSt = renderer._getTaskStyle(floorTask);
+  const floorPt = addSpot(floorTask, floorSt.done);
+  if (floorSt.done) {
+    drawCastleFloorInlay(ctx, floorPt.x, floorPt.y, sc, floorSt.styleIdx, floorSt.style, timeSec, floorSt.preview);
+  } else {
+    drawDustPatch(ctx, floorPt.x, floorPt.y, sc * 1.15);
   }
 
   // 2. Rug / Potions Island Counter
@@ -349,18 +295,21 @@ export function renderCastleRoomSlots(renderer, ctx, area, scene, sc, timeSec, r
   const rugPt = addSpot(rugTask, rugSt.done);
   if (rugSt.done) {
     if (areaIdx === 2) {
-      if (!has3D(rugTask)) {
-        drawStyledPropSprite(ctx, 'h_prop_island', rugPt.x, rugPt.y, 196 * sc, rugSt.styleIdx, {
-          style: rugSt.style, preview: rugSt.preview, timeSec,
-        });
-      }
+      drawStyledPropSprite(ctx, 'h_prop_island', rugPt.x, rugPt.y, 196 * sc, rugSt.styleIdx, {
+        style: rugSt.style,
+        preview: rugSt.preview,
+        timeSec,
+      });
       drawEnchantedPropMotes(ctx, rugPt.x - 16 * sc, rugPt.y - 32 * sc, sc, timeSec, rugSt.style.primary);
-    } else if (!has3D(rugTask)) {
+    } else {
       drawStyledPropSprite(ctx, 'h_prop_rug', rugPt.x, rugPt.y, 232 * sc, rugSt.styleIdx, {
-        style: rugSt.style, flatFloor: true, preview: rugSt.preview, timeSec,
+        style: rugSt.style,
+        flatFloor: true,
+        preview: rugSt.preview,
+        timeSec,
       });
     }
-  } else if (!groundPrepared) {
+  } else {
     drawDustPatch(ctx, rugPt.x, rugPt.y, sc * 0.95);
   }
 
@@ -371,22 +320,24 @@ export function renderCastleRoomSlots(renderer, ctx, area, scene, sc, timeSec, r
   if (curSt.done) {
     if (areaIdx === 3) {
       drawFireplaceFlames(ctx, curPt.x, curPt.y + 18 * sc, sc, timeSec, curSt.styleIdx, curSt.style);
-      if (!has3D(curTask)) {
-        const ceilPt = scene.pt(0.50, 0.19);
-        drawStyledPropSprite(ctx, 'h_prop_chandelier', ceilPt.x, ceilPt.y, 128 * sc, curSt.styleIdx, {
-          style: curSt.style, hanging: true, preview: curSt.preview, timeSec,
-        });
-      }
+      const ceilPt = scene.pt(0.50, 0.19);
+      drawStyledPropSprite(ctx, 'h_prop_chandelier', ceilPt.x, ceilPt.y, 128 * sc, curSt.styleIdx, {
+        style: curSt.style,
+        hanging: true,
+        preview: curSt.preview,
+        timeSec,
+      });
     } else {
-      if (areaIdx === 0 && !groundPrepared) {
+      if (areaIdx === 0) {
         const winPt = scene.pt(0.64, 0.36);
         drawWindowSunbeams(ctx, winPt.x, winPt.y, sc, curSt.style.primary, renderer.weather);
       }
-      if (!has3D(curTask)) {
-        drawStyledPropSprite(ctx, 'h_prop_chandelier', curPt.x, curPt.y, 144 * sc, curSt.styleIdx, {
-          style: curSt.style, hanging: true, preview: curSt.preview, timeSec,
-        });
-      }
+      drawStyledPropSprite(ctx, 'h_prop_chandelier', curPt.x, curPt.y, 144 * sc, curSt.styleIdx, {
+        style: curSt.style,
+        hanging: true,
+        preview: curSt.preview,
+        timeSec,
+      });
     }
   }
 
@@ -394,16 +345,17 @@ export function renderCastleRoomSlots(renderer, ctx, area, scene, sc, timeSec, r
   const bedTask = area.tasks.find((t) => t.slot === 'bed');
   const bedSt = renderer._getTaskStyle(bedTask);
   const bedPt = addSpot(bedTask, bedSt.done);
-  if (!has3D(bedTask)) {
-    if (bedSt.done) {
-      const bedKey = areaIdx === 0 ? 'h_prop_bed' : areaIdx === 2 ? 'h_prop_desk' : 'h_prop_sofa';
-      const bedSize = areaIdx === 0 ? 218 : areaIdx === 1 ? 182 : areaIdx === 2 ? 156 : 206;
-      drawStyledPropSprite(ctx, bedKey, bedPt.x, bedPt.y, bedSize * sc, bedSt.styleIdx, {
-        style: bedSt.style, flipX: areaIdx !== 3, preview: bedSt.preview, timeSec,
-      });
-    } else {
-      drawMovingBoxProp(ctx, bedPt.x, bedPt.y, sc);
-    }
+  if (bedSt.done) {
+    const bedKey = areaIdx === 0 ? 'h_prop_bed' : areaIdx === 2 ? 'h_prop_desk' : 'h_prop_sofa';
+    const bedSize = areaIdx === 0 ? 218 : areaIdx === 1 ? 182 : areaIdx === 2 ? 156 : 206;
+    drawStyledPropSprite(ctx, bedKey, bedPt.x, bedPt.y, bedSize * sc, bedSt.styleIdx, {
+      style: bedSt.style,
+      flipX: areaIdx !== 3,
+      preview: bedSt.preview,
+      timeSec,
+    });
+  } else {
+    drawMovingBoxProp(ctx, bedPt.x, bedPt.y, sc);
   }
 
   // 5. Secondary 3D Furniture ('desk': Wizard Study Desk / Potions Hearth / Grand Piano)
@@ -412,24 +364,23 @@ export function renderCastleRoomSlots(renderer, ctx, area, scene, sc, timeSec, r
   const deskPt = addSpot(deskTask, deskSt.done);
   if (deskSt.done) {
     if (areaIdx === 3) {
-      if (!has3D(deskTask)) {
-        drawStyledPropSprite(ctx, 'h_prop_piano', deskPt.x, deskPt.y, 198 * sc, deskSt.styleIdx, {
-          style: deskSt.style, preview: deskSt.preview, timeSec,
-        });
-      }
+      drawStyledPropSprite(ctx, 'h_prop_piano', deskPt.x, deskPt.y, 198 * sc, deskSt.styleIdx, {
+        style: deskSt.style,
+        preview: deskSt.preview,
+        timeSec,
+      });
       drawEnchantedPropMotes(ctx, deskPt.x, deskPt.y - 36 * sc, sc, timeSec, deskSt.style.secondary, true);
     } else if (areaIdx === 2) {
-      if (!has3D(deskTask)) {
-        drawPotionsHearthCauldron(ctx, deskPt.x, deskPt.y + 6 * sc, sc, timeSec, deskSt.styleIdx, deskSt.style, deskSt.preview);
-      } else {
-        drawFireplaceFlames(ctx, deskPt.x, deskPt.y + 14 * sc, sc * 0.72, timeSec, deskSt.styleIdx, deskSt.style);
-      }
-    } else if (!has3D(deskTask)) {
+      drawPotionsHearthCauldron(ctx, deskPt.x, deskPt.y + 6 * sc, sc, timeSec, deskSt.styleIdx, deskSt.style, deskSt.preview);
+    } else {
       drawStyledPropSprite(ctx, 'h_prop_desk', deskPt.x, deskPt.y, 174 * sc, deskSt.styleIdx, {
-        style: deskSt.style, flipX: areaIdx === 0, preview: deskSt.preview, timeSec,
+        style: deskSt.style,
+        flipX: areaIdx === 0,
+        preview: deskSt.preview,
+        timeSec,
       });
     }
-  } else if (!has3D(deskTask)) {
+  } else {
     drawMovingBoxProp(ctx, deskPt.x, deskPt.y, sc * 0.82);
   }
 
@@ -437,13 +388,15 @@ export function renderCastleRoomSlots(renderer, ctx, area, scene, sc, timeSec, r
   const decTask = area.tasks.find((t) => t.slot === 'decor');
   const decSt = renderer._getTaskStyle(decTask);
   const decPt = addSpot(decTask, decSt.done);
-  if (decSt.done && !has3D(decTask)) {
+  if (decSt.done) {
     const decKey = areaIdx === 0 ? 'h_prop_catbed' : 'h_prop_urn';
     drawStyledPropSprite(ctx, decKey, decPt.x, decPt.y, (areaIdx === 0 ? 122 : 128) * sc, decSt.styleIdx, {
-      style: decSt.style, preview: decSt.preview, timeSec,
+      style: decSt.style,
+      preview: decSt.preview,
+      timeSec,
     });
   }
 
   // 7–9. Expanded Panoramic Castle Slots ('banner', 'alcove', 'hearth')
-  renderExtraCastleSlots(renderer, ctx, area, scene, sc, timeSec, areaIdx, addSpot, rendered3DIds, groundPrepared);
+  renderExtraCastleSlots(renderer, ctx, area, scene, sc, timeSec, areaIdx, addSpot);
 }

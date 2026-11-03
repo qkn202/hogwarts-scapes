@@ -15,13 +15,12 @@ const MIME_MAP = {
   '.json': 'application/json; charset=utf-8',
   '.webmanifest': 'application/manifest+json; charset=utf-8',
   '.webp': 'image/webp',
-  '.glb': 'model/gltf-binary',
   '.png': 'image/png',
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
 };
 
-const COMPRESSIBLE_EXTS = new Set(['.html', '.js', '.css', '.json', '.webmanifest', '.svg', '.glb']);
+const COMPRESSIBLE_EXTS = new Set(['.html', '.js', '.css', '.json', '.webmanifest', '.svg']);
 const HASHED_ASSET_RE = /^\/assets\/.+-[a-zA-Z0-9_-]{7,}\.(js|css)$/;
 const MIN_GZIP_BYTES = 512;
 
@@ -36,7 +35,7 @@ function computeCacheControl(relPath, ext) {
   if (HASHED_ASSET_RE.test(relPath)) {
     return 'public, max-age=31536000, immutable';
   }
-  if (ext === '.webp' || ext === '.glb' || ext === '.png' || ext === '.svg') {
+  if (ext === '.webp' || ext === '.png' || ext === '.svg') {
     return 'public, max-age=604800, stale-while-revalidate=86400';
   }
   // Use `no-cache` instead of `no-store` so HTML documents stay eligible for Back-Forward Cache (bfcache)

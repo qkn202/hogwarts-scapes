@@ -1,7 +1,7 @@
-const SHELL_CACHE = 'hogwarts-shell-v10';
-const ASSET_CACHE = 'hogwarts-assets-v10';
+const SHELL_CACHE = 'hogwarts-shell-v12-classic';
+const ASSET_CACHE = 'hogwarts-assets-v12-classic';
 const PRECACHE_URLS = ['/index.html', '/homescapes.html', '/gardenscapes.html', '/manifest.webmanifest'];
-const MAX_ASSET_ENTRIES = 180;
+const MAX_ASSET_ENTRIES = 140;
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -52,9 +52,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2. HTML documents & WebApp manifest: Network-First so app updates land immediately, offline fallback
+  // 2. HTML documents & WebApp manifest: Network-First (bypass HTTP disk cache) so updates land immediately
   event.respondWith(
-    fetch(request)
+    fetch(request, { cache: 'no-store' })
       .then((res) => {
         if (res && res.status === 200) {
           const clone = res.clone();

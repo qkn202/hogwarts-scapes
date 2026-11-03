@@ -46,7 +46,6 @@ import {
   syncVisitorBanner,
   syncWeatherButton,
 } from './visitorWeather.js';
-import { initPlayrix2025Hud } from '../world3d/world3dPrefsUi.js';
 
 export class ScapesApp {
   constructor(forcedGameId = null) {
@@ -214,6 +213,9 @@ export class ScapesApp {
     } else {
       this.visitorWorld = null;
       this.save.currentArea = Math.min(this.save.currentArea, this.getMaxUnlockedArea());
+      const defaultLine = isHome
+        ? 'Lâu Đài Hogwarts 12 chương (108 chỗ trang trí) đang chờ bạn! Chương 1 biến hóa theo Nhà của bạn!'
+        : 'Khuôn viên Hogwarts 12 khu (108 chỗ trang trí) đang chờ bạn! Kéo map hoặc chạm cổ vật để yểm bùa!';
       const wth = this.save.weather || 'day';
       renderer.setState({
         areaIndex: this.save.currentArea,
@@ -223,7 +225,7 @@ export class ScapesApp {
         weather: wth,
         readOnlyVisitor: false,
         previewOverride: null,
-        austinLine: austinLine ?? '',
+        austinLine: austinLine || defaultLine,
       });
       sound.setWeather(wth);
     }
@@ -473,7 +475,6 @@ export class ScapesApp {
       openLevelBriefingModal(this, this.save.level);
     });
     bindVisitorControls(this);
-    initPlayrix2025Hud(this);
   }
 
   toast(message) {

@@ -18,7 +18,6 @@ import {
   savePrefs,
 } from '../utils/storage.js';
 import { spawnCelebrationFireworks } from '../world/gardenscapesExtras.js';
-import { bindGraphics3DToggle, renderGraphics3DToggleHtml } from '../world3d/world3dPrefsUi.js';
 import { getGameAreas } from './modals.js';
 import { bindSortingHatSelector, renderSortingHatSelectorHtml } from './houseSwitcherUi.js';
 import { syncOnlineProfile } from './onlineHubModal.js';
@@ -48,7 +47,6 @@ function bindVolumeSlider(root, app) {
 function renderVolumeAndColorblindControls(app, idPrefix = '') {
   const vol = app.prefs.volume ?? 80;
   return `
-    ${renderGraphics3DToggleHtml(app, idPrefix)}
     <div class="task-card" style="flex-direction:column; align-items:stretch; gap:6px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <label for="rng-master-vol" style="font-weight:800; cursor:pointer;">🎚️ Âm Lượng Tổng</label>
@@ -64,7 +62,8 @@ function renderVolumeAndColorblindControls(app, idPrefix = '') {
       <button type="button" class="btn-playrix ${app.prefs.colorblind ? 'btn-gold' : 'btn-purple'}" id="${idPrefix}tog-colorblind">
         ${app.prefs.colorblind ? 'Đang Bật' : 'Đang Tắt'}
       </button>
-    </div>`;
+    </div>
+  `;
 }
 
 export function renderStylePickerBar(app) {
@@ -220,7 +219,6 @@ export function openSettingsModal(app) {
   `;
 
   bindVolumeSlider(body, app);
-  bindGraphics3DToggle(body, app, '', () => openSettingsModal(app));
   bindSortingHatSelector(body, app, () => openSettingsModal(app));
   const petInputEl = body.querySelector('#pet-name-input');
   if (petInputEl) petInputEl.value = app.save.petName;
@@ -340,7 +338,6 @@ export function openMatch3PauseModal(app) {
   `;
 
   bindVolumeSlider(body, app);
-  bindGraphics3DToggle(body, app, 'm3-', () => openMatch3PauseModal(app));
   body.querySelector('#m3-tog-colorblind').onclick = () => {
     app.prefs.colorblind = !app.prefs.colorblind;
     savePrefs(app.prefs);
