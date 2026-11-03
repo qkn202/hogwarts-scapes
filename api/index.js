@@ -1,6 +1,6 @@
 /**
  * Vercel Serverless API Entry Point (`/api/*`)
- * Bridges Vercel's Node 24 serverless runtime to `handleHogwartsRequest` (`node:sqlite` in `/tmp`).
+ * Bridges Vercel's Node 24 ESM runtime (`"type": "module"`) to `handleHogwartsRequest`.
  */
 
 import { handleHogwartsRequest } from '../server/hogwartsServer.mjs';
