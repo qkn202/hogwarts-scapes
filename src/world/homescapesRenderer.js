@@ -12,9 +12,14 @@ import { sprites } from '../utils/spriteLoader.js';
 import { getWorld3DStage } from '../world3d/world3dStage.js';
 import {
   computeWanderingPetPos,
+  drawLongPressRing,
   drawReparoSpellBeam,
   drawWeatherAtmosphere,
+  handleWorldHotspotTap,
+  handleWorldLongPress,
+  shouldShowHotspotPin,
   tryHandleActorTap,
+  updateWorldHoldRing,
 } from './gardenscapesExtras.js';
 import {
   ROOM_ANCHORS,
@@ -66,12 +71,14 @@ export class HomescapesWorldRenderer {
         if (!this.readOnlyVisitor) {
           const hs = this._findHotspotAt(clientX, clientY, pointerType);
           if (hs) {
-            this.onSlotClick(hs.task, hs.completed);
+            handleWorldHotspotTap(this, hs);
             return;
           }
         }
         tryHandleActorTap(this, clientX, clientY);
       },
+      onLongPress: (clientX, clientY, pointerType) => handleWorldLongPress(this, clientX, clientY, pointerType),
+      onHoldProgress: (clientX, clientY, prog, pointerType) => updateWorldHoldRing(this, clientX, clientY, prog, pointerType),
       onHover: (clientX, clientY) => {
         const hs = this.readOnlyVisitor ? null : this._findHotspotAt(clientX, clientY, 'mouse');
         this.hoveredTaskId = hs ? hs.task.id : null;
@@ -96,7 +103,10 @@ export class HomescapesWorldRenderer {
     if (weather) this.weather = weather;
     if (readOnlyVisitor !== undefined) this.readOnlyVisitor = Boolean(readOnlyVisitor);
     this.previewOverride = previewOverride;
-    if (austinLine !== null) this.austinLine = austinLine;
+    if (austinLine !== null) {
+      this.austinLine = austinLine;
+      this.austinTimer = austinLine ? 4.2 : 0;
+    }
 
     const activeArea = this._getActiveArea();
     const sIdx = (activeArea.sceneIndex ?? this.areaIndex) % 6;
@@ -265,6 +275,10 @@ export class HomescapesWorldRenderer {
   _update(dt) {
     this.camera.update(dt);
     if (this.petHop > 0) this.petHop = Math.max(0, this.petHop - dt * 2.2);
+    if (this.austinTimer > 0) {
+      this.austinTimer = Math.max(0, this.austinTimer - dt);
+      if (this.austinTimer <= 0 && !this.previewOverride) this.austinLine = '';
+    }
     if (this.spellCast) {
       this.spellCast.t += dt;
       if (this.spellCast.slot) {
@@ -365,13 +379,16 @@ export class HomescapesWorldRenderer {
     if (!this.readOnlyVisitor) {
       for (const hs of this.hotspots) {
         const isPrev = Boolean(this.previewOverride && this.previewOverride.taskId === hs.task.id);
-        drawHotspotPin(ctx, hs, isPrev, timeSec, sc, false, this.hoveredTaskId === hs.task.id);
+        if (shouldShowHotspotPin(this, hs, isPrev)) {
+          drawHotspotPin(ctx, hs, isPrev, timeSec, sc, false, this.hoveredTaskId === hs.task.id);
+        }
       }
+      drawLongPressRing(ctx, this.holdRing, sc);
     }
 
     drawReparoSpellBeam(ctx, this.spellCast, { x: ax, y: ay }, sc, timeSec);
     drawAustin(ctx, ax, ay, sc * 1.05, timeSec, false, this.austinLine, pass3D.prefectReady);
-    drawPet(ctx, px, py, false, timeSec, this.petName, sc * 1.02, pass3D.petReady);
+    drawPet(ctx, px, py, false, timeSec, pass3D.petReady && this.petHop <= 0 ? '' : this.petName, sc * 1.02, pass3D.petReady);
     this._lastActors = { austin: { x: ax, y: ay }, pet: { x: px, y: py }, scale: sc };
 
     if (!this.readOnlyVisitor) {

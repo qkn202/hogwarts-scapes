@@ -1,0 +1,450 @@
+/**
+ * Authentic Playrix Gardenscapes / Homescapes (2025/2026) World HUD (`playrix2025-world.css`)
+ * - Top-left 3D resource pills, compact area ribbon, top-right circular medallions + collapsible Magic Menu
+ * - Bottom-left embossed Leather Task Book & Gringotts Pin medallion, bottom-right giant circular Play Orb CTA
+ */
+
+#game-shell.scapes-shell .top-hud {
+  padding: calc(var(--safe-top, 0px) + 10px) calc(var(--safe-right, 0px) + 16px) 8px calc(var(--safe-left, 0px) + 20px);
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+}
+
+#game-shell.scapes-shell .hud-resources {
+  gap: 18px;
+  flex-wrap: nowrap;
+}
+
+#game-shell.scapes-shell .hud-pill.p25-res-pill {
+  position: relative;
+  height: 38px;
+  min-width: 96px;
+  padding: 0 14px 0 28px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #a4713e 0%, #7b4e24 54%, #593516 100%);
+  border: 2.5px solid #f7cf68;
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+  text-shadow: 0 2px 3px rgba(24, 10, 2, 0.9);
+  box-shadow:
+    0 3px 0 #3d220b,
+    0 6px 14px rgba(0, 0, 0, 0.45),
+    inset 0 2px 1px rgba(255, 238, 186, 0.45),
+    inset 0 -3px 4px rgba(34, 16, 4, 0.55);
+}
+
+#game-shell.scapes-shell .hud-pill.p25-res-pill::before,
+#game-shell.scapes-shell .hud-pill.p25-res-pill::after {
+  content: none !important;
+  display: none !important;
+}
+
+#game-shell.scapes-shell .p25-res-pill .res-icon-badge {
+  position: absolute;
+  left: -13px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.25rem;
+  border: 2.5px solid #ffe48f;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5), inset 0 2px 2px rgba(255, 255, 255, 0.65);
+}
+
+#game-shell.scapes-shell .p25-res-pill.res-lives .res-icon-badge {
+  background: radial-gradient(circle at 35% 28%, #ff758f, #d90429 68%, #800f2f 100%);
+}
+
+#game-shell.scapes-shell .p25-res-pill.res-stars .res-icon-badge {
+  background: radial-gradient(circle at 35% 28%, #fff3b0, #f59f00 68%, #9c5700 100%);
+}
+
+#game-shell.scapes-shell .p25-res-pill.res-coins {
+  padding-right: 34px;
+  cursor: pointer;
+}
+
+#game-shell.scapes-shell .p25-res-pill.res-coins .res-icon-badge {
+  background: radial-gradient(circle at 35% 28%, #fff3b0, #eab308 65%, #a16207 100%);
+}
+
+#game-shell.scapes-shell .p25-res-pill .res-plus-badge {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #ffffff;
+  background: linear-gradient(180deg, #69db7c 0%, #2b8a3e 65%, #1b5e20 100%);
+  border: 2px solid #e9fac8;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
+}
+
+/* Top-Center Compact Area Switcher Ribbon */
+#game-shell.scapes-shell .area-banner {
+  top: calc(var(--safe-top, 0px) + 10px);
+  padding: 4px 14px;
+  gap: 8px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(252, 243, 219, 0.95) 0%, rgba(232, 211, 165, 0.95) 100%);
+  border: 2.5px solid #d4a238;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.38), inset 0 1px 0 #ffffff;
+}
+
+#game-shell.scapes-shell .area-banner::before,
+#game-shell.scapes-shell .area-banner::after {
+  display: none !important;
+}
+
+#game-shell.scapes-shell .area-banner strong {
+  font-size: 0.88rem;
+}
+
+#game-shell.scapes-shell .area-banner button {
+  width: 26px;
+  height: 26px;
+}
+
+/* Top-Right Circular Playrix Medallions */
+#game-shell.scapes-shell .hud-actions {
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.p25-round-btn {
+  position: relative;
+  appearance: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 3px solid #f7cf68;
+  display: grid;
+  place-items: center;
+  font-size: 1.28rem;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow:
+    0 3px 0 #5c3b09,
+    0 6px 14px rgba(0, 0, 0, 0.48),
+    inset 0 2px 2px rgba(255, 255, 255, 0.6);
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+.p25-round-btn:hover {
+  filter: brightness(1.08);
+}
+
+.p25-round-btn:active {
+  transform: translateY(2px);
+}
+
+.p25-btn-gear {
+  background: radial-gradient(circle at 35% 28%, #66d9e8 0%, #1c7ed6 62%, #0b4378 100%);
+}
+
+.p25-btn-menu {
+  background: radial-gradient(circle at 35% 28%, #ffd43b 0%, #d97706 62%, #7c2d12 100%);
+}
+
+.p25-btn-design {
+  background: radial-gradient(circle at 35% 28%, #63e6be 0%, #199268 62%, #0b4a35 100%);
+}
+
+.p25-btn-design.is-active,
+.p25-btn-menu.is-active {
+  border-color: #ffffff;
+  box-shadow:
+    0 0 0 3px #ffd166,
+    0 0 18px rgba(255, 209, 102, 0.85),
+    0 5px 14px rgba(0, 0, 0, 0.5);
+  transform: scale(1.06);
+}
+
+.p25-round-btn .notif-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  margin: 0;
+}
+
+/* Collapsible Top-Right Magic Menu Drawer */
+.magic-menu-drawer {
+  position: absolute;
+  top: calc(var(--safe-top, 0px) + 64px);
+  right: calc(var(--safe-right, 0px) + 16px);
+  z-index: 32;
+  width: min(336px, calc(100dvw - 24px));
+  padding: 12px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(64, 38, 18, 0.97) 0%, rgba(36, 20, 9, 0.98) 100%);
+  border: 3px solid #f5c85c;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 242, 198, 0.45);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.magic-drawer-head {
+  display: flex;
+  justify-content: center;
+}
+
+#game-shell.scapes-shell .magic-drawer-head #hud-game-title {
+  display: inline-flex !important;
+  font-size: 0.82rem;
+  padding: 5px 12px;
+}
+
+.magic-drawer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+#game-shell.scapes-shell .magic-drawer-grid > button {
+  width: 100%;
+  min-height: 40px;
+  padding: 7px 10px;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  justify-content: center;
+}
+
+#game-shell.scapes-shell .magic-drawer-grid .hud-btn-label,
+#game-shell.scapes-shell .magic-drawer-grid .world-rail-label {
+  display: inline !important;
+}
+
+#game-shell.scapes-shell .magic-menu-drawer .world-zoom-pill {
+  position: static;
+  width: 100%;
+  justify-content: space-between;
+  padding: 4px 6px;
+}
+
+/* World Bottom Dock */
+#game-shell.scapes-shell .world-dock {
+  bottom: calc(var(--safe-bottom, 0px) + 14px);
+  left: calc(var(--safe-left, 0px) + 18px);
+  right: calc(var(--safe-right, 0px) + 18px);
+  align-items: flex-end;
+}
+
+#game-shell.scapes-shell #btn-open-tablet.p25-task-book {
+  position: relative;
+  width: 76px;
+  height: 82px;
+  padding: 6px 4px 8px;
+  border-radius: 14px 18px 16px 12px;
+  background: linear-gradient(155deg, #d8963e 0%, #a8641c 58%, #78420c 100%);
+  border: 3px solid #ffe082;
+  font-size: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  transform: rotate(-5deg);
+  box-shadow:
+    -4px 5px 0 #4d2905,
+    0 8px 0 #f5eedc,
+    0 11px 0 #5b3309,
+    0 16px 24px rgba(0, 0, 0, 0.58),
+    inset 0 2px 3px rgba(255, 245, 200, 0.65);
+}
+
+#game-shell.scapes-shell #btn-open-tablet.p25-task-book:hover {
+  transform: rotate(-3deg) translateY(-2px);
+}
+
+#game-shell.scapes-shell #btn-open-tablet.p25-task-book::before {
+  content: '✔';
+  font-size: 2rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #ffe57f;
+  text-shadow: 0 2px 0 #6e3d07, 0 4px 8px rgba(0, 0, 0, 0.45);
+  margin-bottom: auto;
+  margin-top: 6px;
+}
+
+#game-shell.scapes-shell #btn-open-tablet.p25-task-book::after {
+  content: '';
+  position: absolute;
+  bottom: -11px;
+  left: 20px;
+  width: 12px;
+  height: 10px;
+  background: #2b8a3e;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 72%, 0 100%);
+}
+
+#game-shell.scapes-shell #btn-open-tablet.p25-task-book .dock-btn-label {
+  font-size: 0.66rem;
+  font-weight: 900;
+  color: #fff8dc;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+  white-space: nowrap;
+}
+
+#game-shell.scapes-shell #btn-open-tablet.p25-task-book .dock-btn-extra {
+  display: none !important;
+}
+
+#game-shell.scapes-shell #btn-open-tablet.p25-task-book .notif-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  margin: 0;
+}
+
+#game-shell.scapes-shell #btn-open-pin.p25-pin-medallion {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 1.35rem;
+  display: grid;
+  place-items: center;
+  border: 2.5px solid #ffd875;
+}
+
+#game-shell.scapes-shell #btn-open-pin.p25-pin-medallion .dock-btn-label,
+#game-shell.scapes-shell #btn-open-pin.p25-pin-medallion .dock-btn-extra {
+  display: none !important;
+}
+
+#game-shell.scapes-shell #btn-open-pin.p25-pin-medallion .notif-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  margin: 0;
+}
+
+#game-shell.scapes-shell #btn-open-briefing.p25-play-orb {
+  position: relative;
+  width: 98px;
+  height: 98px;
+  padding: 0 !important;
+  border-radius: 50%;
+  border: 4px solid #fce088;
+  background: radial-gradient(circle at 34% 26%, #74f2ce 0%, #20a4f3 56%, #0d47a1 100%);
+  box-shadow:
+    0 5px 0 #6e470b,
+    0 0 0 3px #a87014,
+    0 14px 30px rgba(0, 0, 0, 0.62),
+    inset 0 4px 6px rgba(255, 255, 255, 0.72);
+  display: grid;
+  place-items: center;
+}
+
+#game-shell.scapes-shell #btn-open-briefing.p25-play-orb.btn-purple {
+  background: radial-gradient(circle at 34% 26%, #e0aaff 0%, #7b2cbf 58%, #3c096c 100%);
+}
+
+#game-shell.scapes-shell #btn-open-briefing.p25-play-orb.btn-red {
+  background: radial-gradient(circle at 34% 26%, #ff8fa3 0%, #d90429 58%, #640d14 100%);
+}
+
+.p25-play-sphere {
+  display: grid;
+  place-items: center;
+}
+
+.p25-play-tri {
+  font-size: 2.55rem;
+  line-height: 1;
+  margin-left: 5px;
+  color: #ffd43b;
+  filter: drop-shadow(0 3px 0 #8c5106) drop-shadow(0 5px 8px rgba(0, 0, 0, 0.45));
+}
+
+.p25-play-pill {
+  position: absolute;
+  bottom: -8px;
+  right: -6px;
+  min-width: 78px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #8d5828 0%, #583312 100%);
+  border: 2.5px solid #ffd875;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.08;
+}
+
+#game-shell.scapes-shell .p25-play-pill #btn-play-level-num {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+}
+
+#game-shell.scapes-shell .p25-play-pill #btn-play-level-sub {
+  font-size: 0.58rem;
+  color: #ffe8a3;
+  white-space: nowrap;
+}
+
+@media (max-width: 960px) {
+  #game-shell.scapes-shell .area-banner {
+    top: calc(var(--safe-top, 0px) + 56px);
+  }
+}
+
+@media (max-width: 860px) and (orientation: portrait) {
+  #game-shell.scapes-shell .hud-resources {
+    gap: 10px;
+  }
+  #game-shell.scapes-shell .hud-pill.p25-res-pill {
+    min-width: 66px;
+    height: 32px;
+    padding: 0 8px 0 22px;
+    font-size: 0.82rem;
+  }
+  #game-shell.scapes-shell .p25-res-pill.res-coins {
+    padding-right: 24px;
+  }
+  #game-shell.scapes-shell .p25-res-pill .res-icon-badge {
+    width: 28px;
+    height: 28px;
+    left: -9px;
+    font-size: 0.95rem;
+  }
+  #game-shell.scapes-shell .p25-res-pill .res-plus-badge {
+    width: 18px;
+    height: 18px;
+    font-size: 0.8rem;
+  }
+  .p25-round-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 1.05rem;
+  }
+  #game-shell.scapes-shell #btn-open-briefing.p25-play-orb {
+    width: 78px;
+    height: 78px;
+    max-width: none;
+  }
+  .p25-play-tri {
+    font-size: 2rem;
+  }
+}

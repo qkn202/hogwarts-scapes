@@ -1,0 +1,379 @@
+/**
+ * Authentic Playrix Gardenscapes / Homescapes (2025/2026) Match-3 Stage (`playrix2025-match3.css`)
+ * - Open transparent 3D Companion Stage on stone pedestal directly above Wood & Gold Moves + Energy Sphere plaque
+ * - Sleek top Score & Goals header bar above the centered 8x8 board
+ * - Vertical carved wooden Booster Rack with circular 3D glossy medallions
+ */
+
+#game-shell.scapes-shell .match3-stage {
+  grid-template-columns: 268px minmax(0, 1fr) 98px;
+  gap: 14px;
+  padding: 10px 18px 12px;
+  background-image:
+    radial-gradient(circle at 22% 38%, rgba(255, 224, 150, 0.16), transparent 52%),
+    linear-gradient(180deg, rgba(24, 18, 12, 0.34), rgba(12, 22, 16, 0.58)),
+    var(--m3-bg-url, none);
+}
+
+#game-shell.scapes-shell .m3-left-panel {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  gap: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+#game-shell.scapes-shell .austin-m3-card {
+  position: relative;
+  width: 100%;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+#game-shell.scapes-shell .austin-m3-card .m3-companion-3d-box {
+  width: 262px;
+  height: 246px;
+  border-radius: 0;
+  background: radial-gradient(circle at 50% 48%, rgba(255, 232, 158, 0.22), transparent 68%);
+  margin-bottom: -16px;
+  z-index: 2;
+}
+
+.m3-companion-caption {
+  order: -1;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(88, 52, 22, 0.92), rgba(48, 26, 10, 0.94));
+  border: 2px solid #f5c85c;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+  text-align: center;
+  z-index: 3;
+}
+
+#game-shell.scapes-shell #m3-level-label {
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: #fff6dc;
+}
+
+#game-shell.scapes-shell #m3-austin-mood {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #ffd875 !important;
+}
+
+/* Carved Walnut Wood & Brushed-Gold Moves + Patronus/Time-Turner Sphere Plaque */
+.m3-moves-energy-plaque {
+  position: relative;
+  z-index: 3;
+  width: 256px;
+  min-height: 92px;
+  padding: 8px 14px 8px 18px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #8b572a 0%, #5e3717 55%, #3d210b 100%);
+  border: 3.5px solid #f7cf68;
+  box-shadow:
+    0 5px 0 #2b1505,
+    0 12px 26px rgba(0, 0, 0, 0.62),
+    inset 0 2px 2px rgba(255, 236, 179, 0.5),
+    inset 0 -3px 6px rgba(22, 10, 2, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+#game-shell.scapes-shell .m3-moves-energy-plaque .moves-box {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0;
+  flex: 1;
+  text-align: center;
+}
+
+#game-shell.scapes-shell .m3-moves-energy-plaque .moves-num {
+  font-family: var(--font-display) !important;
+  font-size: 2.85rem;
+  font-weight: 900;
+  line-height: 0.98;
+  color: #ffffff;
+  text-shadow: 0 3px 0 #3b1e06, 0 5px 10px rgba(0, 0, 0, 0.55);
+}
+
+#game-shell.scapes-shell .m3-moves-energy-plaque .moves-label {
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: #ffe082;
+  margin-top: 2px;
+}
+
+#game-shell.scapes-shell .m3-moves-energy-plaque #garden-rainbow-meter {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0;
+  margin: -14px -6px -14px 0;
+}
+
+#game-shell.scapes-shell .m3-moves-energy-plaque .rainbow-dial-wrap {
+  position: relative;
+  margin: 0;
+}
+
+#game-shell.scapes-shell .m3-moves-energy-plaque .rainbow-dial-ring {
+  width: 82px;
+  height: 82px;
+  padding: 6px;
+  border: 3.5px solid #f7cf68;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.55),
+    0 0 18px rgba(114, 239, 221, 0.5),
+    inset 0 2px 4px rgba(255, 255, 255, 0.65);
+}
+
+#game-shell.scapes-shell .m3-moves-energy-plaque .rainbow-dial-ring img {
+  width: 62px;
+  height: 62px;
+  padding: 4px;
+  background: radial-gradient(circle at 40% 35%, #48cae4 0%, #166541 68%, #082419 100%);
+}
+
+.rainbow-pct-pill {
+  position: absolute;
+  bottom: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1px 9px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #7c4d25, #47280e);
+  border: 2px solid #f7cf68;
+  font-size: 0.74rem;
+  font-weight: 900;
+  color: #fff8dc;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+}
+
+/* Center Board Column + Top Floating Score & Goals Header */
+.m3-board-column {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.m3-top-goals-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 5px 16px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(96, 58, 26, 0.94) 0%, rgba(54, 30, 12, 0.96) 100%);
+  border: 2.5px solid #f5c85c;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.45);
+  max-width: 100%;
+}
+
+.m3-top-goals-bar .m3-score-row {
+  font-size: 0.92rem;
+  font-weight: 900;
+  color: #ffe58f;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.75);
+  white-space: nowrap;
+}
+
+.m3-top-goals-bar .m3-goals-sec {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.m3-top-goals-bar .m3-sec-label {
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: #f8dfa1;
+  letter-spacing: 0.04em;
+}
+
+#game-shell.scapes-shell .m3-top-goals-bar .goal-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 3px 10px 3px 6px;
+  border-radius: 999px;
+  font-size: 0.88rem;
+}
+
+/* Right Column — Carved Wooden Booster Rack & Circular 3D Medallions */
+.m3-booster-rack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 10px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(124, 77, 37, 0.92) 0%, rgba(68, 38, 15, 0.95) 100%);
+  border: 3px solid #f5c85c;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.52), inset 0 2px 2px rgba(255, 236, 179, 0.4);
+}
+
+#game-shell.scapes-shell .booster-btn.p25-booster-medallion {
+  position: relative;
+  width: 66px;
+  height: 66px;
+  padding: 0;
+  border-radius: 50%;
+  border: 3px solid #ffe082;
+  display: grid;
+  place-items: center;
+  box-shadow:
+    0 4px 0 #4d2c08,
+    0 7px 14px rgba(0, 0, 0, 0.5),
+    inset 0 3px 4px rgba(255, 255, 255, 0.65);
+}
+
+#game-shell.scapes-shell .p25-booster-medallion.orb-green {
+  background: radial-gradient(circle at 35% 28%, #8ce99a 0%, #2f9e44 62%, #14532d 100%);
+}
+
+#game-shell.scapes-shell .p25-booster-medallion.orb-cyan {
+  background: radial-gradient(circle at 35% 28%, #99e9f2 0%, #1098ad 62%, #0b4f6c 100%);
+}
+
+#game-shell.scapes-shell .p25-booster-medallion.orb-azure {
+  background: radial-gradient(circle at 35% 28%, #74c0fc 0%, #1971c2 62%, #0b3966 100%);
+}
+
+.p25-booster-medallion .booster-name-lbl {
+  display: none;
+}
+
+.p25-booster-medallion .booster-cnt-badge {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #4dabf7, #1864ab);
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  font-size: 0.74rem;
+  font-weight: 900;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.p25-booster-medallion .booster-cnt-badge.is-plus {
+  background: linear-gradient(180deg, #69db7c, #2b8a3e);
+}
+
+#game-shell.scapes-shell #m3-pause-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 3px solid #f7cf68;
+  background: radial-gradient(circle at 35% 28%, #66d9e8 0%, #1c7ed6 62%, #0b4378 100%);
+  color: #ffffff;
+}
+
+@media (max-width: 860px) and (orientation: portrait) {
+  #game-shell.scapes-shell .match3-stage {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 6px;
+    padding: calc(var(--safe-top, 0px) + 6px) 8px calc(var(--safe-bottom, 0px) + 8px);
+  }
+  #game-shell.scapes-shell .m3-left-panel {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  #game-shell.scapes-shell .austin-m3-card {
+    width: auto;
+    flex-direction: row;
+    gap: 6px;
+  }
+  #game-shell.scapes-shell .austin-m3-card .m3-companion-3d-box {
+    width: 64px;
+    height: 60px;
+    margin-bottom: 0;
+  }
+  .m3-moves-energy-plaque {
+    width: auto;
+    min-height: 58px;
+    padding: 4px 10px;
+  }
+  #game-shell.scapes-shell .m3-moves-energy-plaque .moves-num {
+    font-size: 1.65rem;
+  }
+  #game-shell.scapes-shell .m3-moves-energy-plaque .rainbow-dial-ring {
+    width: 48px;
+    height: 48px;
+  }
+  #game-shell.scapes-shell .m3-moves-energy-plaque .rainbow-dial-ring img {
+    width: 34px;
+    height: 34px;
+  }
+  .m3-booster-rack {
+    flex-direction: row;
+    padding: 5px 10px;
+    gap: 10px;
+  }
+  #game-shell.scapes-shell .booster-btn.p25-booster-medallion {
+    width: 52px !important;
+    height: 52px !important;
+    flex: 0 0 auto;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 540px) {
+  #game-shell.scapes-shell .match3-stage {
+    grid-template-columns: 184px minmax(0, 1fr) 82px;
+    gap: 8px;
+    padding: 6px 10px;
+  }
+  #game-shell.scapes-shell .austin-m3-card .m3-companion-3d-box {
+    width: 176px;
+    height: 150px;
+    margin-bottom: -12px;
+  }
+  .m3-moves-energy-plaque {
+    width: 180px;
+    min-height: 68px;
+    padding: 5px 10px;
+  }
+  #game-shell.scapes-shell .m3-moves-energy-plaque .moves-num {
+    font-size: 2rem;
+  }
+  #game-shell.scapes-shell .m3-moves-energy-plaque .rainbow-dial-ring {
+    width: 56px;
+    height: 56px;
+  }
+  #game-shell.scapes-shell .m3-moves-energy-plaque .rainbow-dial-ring img {
+    width: 40px;
+    height: 40px;
+  }
+  #game-shell.scapes-shell .booster-btn.p25-booster-medallion {
+    width: 52px !important;
+    height: 52px !important;
+  }
+}

@@ -9,6 +9,8 @@ import './styles/mobile-match3.css';
 import './styles/liveops-online.css';
 import './styles/world-map.css';
 import './styles/mobile-compact.css';
+import './styles/playrix2025-world.css';
+import './styles/playrix2025-match3.css';
 import { ScapesApp } from './ui/appShell.js';
 
 const forcedGame = document.body.dataset.forcedGame || null;

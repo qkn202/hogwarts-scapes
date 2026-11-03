@@ -68,16 +68,19 @@ export function syncMatch3SessionHud(app, board, armedBooster) {
   const boosterCol = document.getElementById('m3-boosters-col');
   const defs = INGAME_BOOSTER_DEFS[app.gameId];
   boosterCol.innerHTML =
+    `<div class="m3-booster-rack">` +
     defs
-      .map((b) => {
+      .map((b, idx) => {
         const cnt = app.save.boosters[b.key] || 0;
-        return `<button type="button" class="booster-btn ${armedBooster === b.key ? 'armed' : ''}" data-ingame-booster="${b.key}">
-          <span style="display:grid; place-items:center; height:30px;">${renderBadgeVisual(b, 28)}</span>
-          <span>${b.name}</span>
-          <span style="color:#ffd166;">${cnt > 0 ? `x${cnt}` : `+3 (${b.price}💰)`}</span>
+        const orbTone = idx === 0 ? 'orb-green' : idx === 1 ? 'orb-cyan' : 'orb-azure';
+        return `<button type="button" class="booster-btn p25-booster-medallion ${orbTone} ${armedBooster === b.key ? 'armed' : ''}" data-ingame-booster="${b.key}" title="${b.name} (${cnt > 0 ? 'Còn x' + cnt : '+3 với ' + b.price + ' 💰'})" aria-label="${b.name}">
+          <span class="booster-orb-face">${renderBadgeVisual(b, 32)}</span>
+          <span class="booster-name-lbl">${b.name}</span>
+          <span class="booster-cnt-badge ${cnt <= 0 ? 'is-plus' : ''}">${cnt > 0 ? cnt : '+'}</span>
         </button>`;
       })
       .join('') +
+    `</div>` +
     `<button type="button" class="m3-pause-btn" id="m3-pause-btn" title="Tạm dừng / Thoát màn" aria-label="Tạm dừng">⚙️</button>`;
 
   boosterCol.querySelector('#m3-pause-btn')?.addEventListener('click', () => {

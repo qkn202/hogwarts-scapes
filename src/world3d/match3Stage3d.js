@@ -20,7 +20,7 @@ import {
   renderSceneToCanvas2D,
 } from './sharedWebgl.js';
 
-const ATLAS_CELL = 128;
+const ATLAS_CELL = 192;
 const QUADRANT_COORDS = {
   rainbow: [0, 0],
   bomb: [ATLAS_CELL, 0],
@@ -41,6 +41,7 @@ class Match3Hybrid3DEngine {
     this.compScene = null;
     this.compCam = null;
     this.compPedestal = null;
+    this.compPedTopY = 0.42;
     this.compPrefect = null;
     this.compPrefectParts = {};
     this.compPet = null;
@@ -60,43 +61,47 @@ class Match3Hybrid3DEngine {
     this.atlasCanvas.width = ATLAS_CELL * 2;
     this.atlasCanvas.height = ATLAS_CELL * 2;
 
-    // Build 4 mini studio scenes for the 2x2 dynamic 3D Match-3 Atlas
+    // Build 4 mini studio scenes for the 2x2 dynamic 3D Match-3 Atlas (Playrix candy-gloss rig)
     for (let i = 0; i < 4; i++) {
       const sc = new THREE.Scene();
-      const hemi = new THREE.HemisphereLight(0xfff8e7, 0x3b2848, 1.45);
-      const dir = new THREE.DirectionalLight(0xffedd5, 2.25);
-      dir.position.set(-2.2, 3.6, 3.2);
-      const rim = new THREE.DirectionalLight(0x72efdd, 1.05);
-      rim.position.set(2.5, 1.8, -2.2);
-      sc.add(hemi, dir, rim);
+      const hemi = new THREE.HemisphereLight(0xfffaf0, 0x3b1c38, 1.18);
+      const dir = new THREE.DirectionalLight(0xfff1d0, 1.78);
+      dir.position.set(-2.0, 3.8, 3.4);
+      const fill = new THREE.DirectionalLight(0xffd6a5, 0.58);
+      fill.position.set(2.4, -1.2, 2.6);
+      const rim = new THREE.DirectionalLight(0x72efdd, 0.75);
+      rim.position.set(2.5, 2.2, -2.2);
+      sc.add(hemi, dir, fill, rim);
 
-      const cam = new THREE.PerspectiveCamera(32, 1, 0.1, 20);
-      cam.position.set(0, 0.95, 2.55);
-      cam.lookAt(0, 0.36, 0);
+      const cam = new THREE.PerspectiveCamera(30, 1, 0.1, 20);
+      cam.position.set(0, 0.62, 2.02);
+      cam.lookAt(0, 0.12, 0);
       this.quadrants.push({ scene: sc, camera: cam });
     }
 
-    // Build Companion 3D Stage scene (`m3_pedestal` + `char_prefect` + `pet`)
+    // Build Open Transparent Playrix 2025 Companion 3D Stage (`m3_pedestal` + `char_prefect` + `pet`)
     this.compScene = new THREE.Scene();
-    const cHemi = new THREE.HemisphereLight(0xfff5d6, 0x243b2b, 1.35);
-    const cKey = new THREE.DirectionalLight(0xffe7b0, 2.15);
-    cKey.position.set(-2.6, 4.4, 3.4);
+    const cHemi = new THREE.HemisphereLight(0xfff7df, 0x243b2b, 1.55);
+    const cKey = new THREE.DirectionalLight(0xffebb8, 2.35);
+    cKey.position.set(-2.6, 4.4, 3.6);
     cKey.castShadow = true;
-    const cRim = new THREE.DirectionalLight(0x72efdd, 0.95);
+    const cFill = new THREE.DirectionalLight(0xffd8a8, 0.85);
+    cFill.position.set(2.2, 1.2, 2.8);
+    const cRim = new THREE.DirectionalLight(0x72efdd, 1.05);
     cRim.position.set(2.8, 2.5, -2.4);
-    this.compScene.add(cHemi, cKey, cRim);
+    this.compScene.add(cHemi, cKey, cFill, cRim);
     this.compRim = cRim;
 
-    this.compCam = new THREE.PerspectiveCamera(33, 1.15, 0.1, 30);
-    this.compCam.position.set(0, 1.72, 4.25);
-    this.compCam.lookAt(0, 0.96, 0);
+    this.compCam = new THREE.PerspectiveCamera(30, 1.05, 0.1, 30);
+    this.compCam.position.set(0, 1.44, 4.38);
+    this.compCam.lookAt(0, 0.78, 0);
   }
 
   _populateAtlasModels() {
     const specs = [
-      ['rainbow', 'm3_rainbow', 0, 1.08],
-      ['bomb', 'm3_bomb', 1, 1.04],
-      ['snitch', 'm3_snitch', 2, 0.96],
+      ['rainbow', 'm3_rainbow', 0, 1.06],
+      ['bomb', 'm3_bomb', 1, 1.06],
+      ['snitch', 'm3_snitch', 2, 1.12],
       ['potion', 'm3_potion', 3, 1.08],
     ];
     let readyCount = 0;
@@ -112,8 +117,60 @@ class Match3Hybrid3DEngine {
           const entry = inst.userData.glbEntry;
           const sc = targetSpan / Math.max(0.25, entry.maxSpan);
           inst.scale.setScalar(sc);
-          inst.position.set(0, 0.36, 0);
-          if (slot === 'snitch') {
+          inst.position.set(0, 0.12, 0);
+          if (slot === 'rainbow') {
+            const tmpCol = new THREE.Color();
+            inst.traverse((n) => {
+              if (!n.isMesh || !n.geometry) return;
+              const mName = n.material?.name || '';
+              if (mName.includes('Gold') || mName.includes('Secondary')) return;
+              const geo = n.geometry.index ? n.geometry.toNonIndexed() : n.geometry.clone();
+              geo.computeVertexNormals();
+              const pos = geo.attributes.position;
+              const nrm = geo.attributes.normal;
+              const colors = new Float32Array(pos.count * 3);
+              for (let f = 0; f < pos.count; f += 3) {
+                const cx = (pos.getX(f) + pos.getX(f + 1) + pos.getX(f + 2)) / 3;
+                const cy = (pos.getY(f) + pos.getY(f + 1) + pos.getY(f + 2)) / 3;
+                const cz = (pos.getZ(f) + pos.getZ(f + 1) + pos.getZ(f + 2)) / 3;
+                const nx = nrm.getX(f);
+                const ny = nrm.getY(f);
+                const nz = nrm.getZ(f);
+                const theta = Math.atan2(cz, cx);
+                const phi = Math.atan2(cy, Math.hypot(cx, cz));
+                const hue = (((theta / (Math.PI * 2)) + 0.5 + phi * 0.45) % 1 + 1) % 1;
+                const ndotl = Math.max(-0.45, nx * -0.44 + ny * 0.72 + nz * 0.54);
+                const glint = ndotl > 0.87 ? 0.16 : 0;
+                const sat = ndotl > 0.91 ? 0.88 : 0.98;
+                const lit = Math.min(0.78, 0.38 + (ndotl + 0.45) * 0.22 + glint);
+                tmpCol.setHSL(hue, sat, lit);
+                for (let k = 0; k < 3; k++) {
+                  const base = (f + k) * 3;
+                  colors[base] = tmpCol.r;
+                  colors[base + 1] = tmpCol.g;
+                  colors[base + 2] = tmpCol.b;
+                }
+              }
+              geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+              n.geometry = geo;
+              n.material = new THREE.MeshBasicMaterial({ vertexColors: true });
+            });
+          } else if (slot === 'potion') {
+            inst.traverse((n) => {
+              if (!n.isMesh || !n.material) return;
+              const m = n.material;
+              if (m.transparent) {
+                m.opacity = 0.34;
+                m.roughness = 0.08;
+              } else if ((n.name || '').toLowerCase().includes('liquid') || (m.color && m.color.r > m.color.g * 1.4)) {
+                m.color.setHex(0xd90429);
+                if (m.emissive) {
+                  m.emissive.setHex(0x6a040f);
+                  m.emissiveIntensity = 0.35;
+                }
+              }
+            });
+          } else if (slot === 'snitch') {
             inst.traverse((n) => {
               if (n.name === 'WingL') this.snitchWings.L = n;
               if (n.name === 'WingR') this.snitchWings.R = n;
@@ -132,9 +189,10 @@ class Match3Hybrid3DEngine {
     if (!this.compPedestal && hasGlbLoaded('m3_pedestal')) {
       const ped = cloneGlbInstance('m3_pedestal', { castShadow: false, receiveShadow: true, centerXZ: true });
       if (ped) {
-        ped.scale.set(1.55, 0.52, 1.45);
-        ped.position.set(0, -0.05, 0);
-        ped.rotation.y = 0.38;
+        ped.scale.set(0.88, 0.82, 0.88);
+        ped.position.set(0, -0.18, 0);
+        ped.rotation.y = 0.36;
+        this.compPedTopY = -0.18 + ped.userData.glbEntry.sizeY * ped.scale.y - 0.025;
         this.compScene.add(ped);
         this.compPedestal = ped;
       }
@@ -151,8 +209,8 @@ class Match3Hybrid3DEngine {
           }
         });
         this.compPrefectParts = parts;
-        pref.scale.setScalar(0.95);
-        pref.position.set(-0.26, 0.46, 0.05);
+        pref.scale.setScalar(1.02);
+        pref.position.set(-0.22, this.compPedTopY, 0.05);
         this.compScene.add(pref);
         this.compPrefect = pref;
       }
@@ -168,8 +226,8 @@ class Match3Hybrid3DEngine {
     if (!this.compPet && hasGlbLoaded(wantPet)) {
       const pet = cloneGlbInstance(wantPet, { castShadow: true, receiveShadow: true, centerXZ: true });
       if (pet) {
-        pet.scale.setScalar(wantPet === 'pet_niffler' ? 0.78 : 0.72);
-        pet.position.set(0.46, 0.46, 0.14);
+        pet.scale.setScalar(wantPet === 'pet_niffler' ? 0.82 : 0.76);
+        pet.position.set(0.34, this.compPedTopY, 0.14);
         this.compScene.add(pet);
         this.compPet = pet;
         this.compPetKey = wantPet;
@@ -267,7 +325,7 @@ class Match3Hybrid3DEngine {
         const isLowMoves = board.movesLeft <= 5 && !controller.finaleActive;
 
         const jumpY = isCheering ? Math.abs(Math.sin(timeSec * 11)) * 0.18 : 0;
-        this.compPrefect.position.y = 0.46 + jumpY;
+        this.compPrefect.position.y = this.compPedTopY + jumpY;
         this.compPrefect.rotation.y = 0.24 + (isCheering ? Math.sin(timeSec * 9) * 0.25 : Math.sin(timeSec * 1.6) * 0.14);
 
         const { Head: head, ArmR_Wand: armR, ArmL: armL } = this.compPrefectParts;
@@ -287,14 +345,14 @@ class Match3Hybrid3DEngine {
 
         if (this.compPet) {
           const petHop = isCheering ? Math.abs(Math.cos(timeSec * 12)) * 0.24 : Math.abs(Math.sin(timeSec * 3.8)) * 0.05;
-          this.compPet.position.y = 0.46 + petHop;
+          this.compPet.position.y = this.compPedTopY + petHop;
           this.compPet.rotation.y = -0.32 + (isCheering ? timeSec * 5.2 : Math.sin(timeSec * 2.2) * 0.18);
         }
 
         this.compRim.color.setHex(isLowMoves ? 0xff4d6d : isCheering ? 0xffd166 : 0x72efdd);
         const rect = compCanvas.getBoundingClientRect();
-        const cw = Math.max(72, Math.floor(rect.width || 96));
-        const ch = Math.max(72, Math.floor(rect.height || 86));
+        const cw = Math.max(120, Math.floor(rect.width || 220));
+        const ch = Math.max(120, Math.floor(rect.height || 210));
         this.compCam.aspect = cw / ch;
         this.compCam.updateProjectionMatrix();
         renderSceneToCanvas2D(compCanvas, this.compScene, this.compCam, cw, ch);
@@ -306,8 +364,14 @@ class Match3Hybrid3DEngine {
     if (!this.atlasReady || !this.atlasCanvas) return false;
     const coords = QUADRANT_COORDS[kind];
     if (!coords) return false;
-    const d = size * 0.98;
+    const d = size * 1.02;
+    ctx.save();
+    // Playrix tactile dark-amber sticker drop-contour so 3D pieces match 2D gem weight & contrast
+    ctx.shadowColor = 'rgba(26, 12, 4, 0.65)';
+    ctx.shadowBlur = Math.max(2.5, size * 0.06);
+    ctx.shadowOffsetY = Math.max(1.5, size * 0.035);
     ctx.drawImage(this.atlasCanvas, coords[0], coords[1], ATLAS_CELL, ATLAS_CELL, -d * 0.5, -d * 0.5, d, d);
+    ctx.restore();
     return true;
   }
 }

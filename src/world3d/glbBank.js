@@ -56,9 +56,50 @@ export const HOUSE_3D_PALETTES = {
   hufflepuff: { primary: '#eab308', secondary: '#27272a', emissive: '#fef08a' },
 };
 
-const WOOD_STYLE_HEX = ['#7f4f24', '#3d2618', '#9c4221'];
-const STONE_STYLE_HEX = ['#b8afa1', '#94a3b8', '#d6c7a9'];
+const NATURAL_STONE_TINTS = ['#ffffff', '#dce6f5', '#f7e6c4'];
+const NATURAL_WOOD_TINTS = ['#ffffff', '#d8c3b0', '#f0c4a0'];
 const MAGIC_STYLE_HEX = ['#38bdf8', '#34d399', '#c084fc'];
+
+let _sharedContactShadowTex = null;
+let _sharedContactShadowGeo = null;
+
+function getContactShadowResources() {
+  if (!_sharedContactShadowTex && typeof document !== 'undefined') {
+    const cv = document.createElement('canvas');
+    cv.width = 64;
+    cv.height = 64;
+    const g = cv.getContext('2d');
+    const grad = g.createRadialGradient(32, 32, 3, 32, 32, 31);
+    grad.addColorStop(0, 'rgba(18, 26, 14, 0.82)');
+    grad.addColorStop(0.48, 'rgba(20, 30, 16, 0.42)');
+    grad.addColorStop(0.82, 'rgba(20, 30, 16, 0.10)');
+    grad.addColorStop(1, 'rgba(20, 30, 16, 0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 64, 64);
+    _sharedContactShadowTex = new THREE.CanvasTexture(cv);
+    _sharedContactShadowTex.colorSpace = THREE.SRGBColorSpace;
+  }
+  if (!_sharedContactShadowGeo) {
+    _sharedContactShadowGeo = new THREE.PlaneGeometry(1, 1);
+    _sharedContactShadowGeo.rotateX(-Math.PI / 2);
+  }
+  return { tex: _sharedContactShadowTex, geo: _sharedContactShadowGeo };
+}
+
+export function createContactShadowDisc(opacity = 0.46) {
+  const { tex, geo } = getContactShadowResources();
+  const mat = new THREE.MeshBasicMaterial({
+    map: tex,
+    transparent: true,
+    opacity,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -1,
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.renderOrder = -1;
+  return mesh;
+}
 
 const loader = new GLTFLoader();
 /** @type {Map<string, { template: THREE.Group, minY: number, centerX: number, centerZ: number, sizeX: number, sizeY: number, sizeZ: number, maxSpan: number }>} */
@@ -87,12 +128,23 @@ export function ensureGlbModel(rawKey) {
       url,
       (gltf) => {
         const root = gltf.scene;
-        // Calibrate ultra-dark robes/fur/metals so Playrix clay silhouettes gleam in daylight & candlelight
+        // Enable crisp sRGB hand-painted atlas + baked raytraced vertex-color AO (`COLOR_0`)
+        const hasVertexColorAttr = new WeakSet();
         root.traverse((n) => {
           if (!n.isMesh || !n.material) return;
+          const hasVC = Boolean(n.geometry?.attributes?.color);
           const mats = Array.isArray(n.material) ? n.material : [n.material];
           for (const m of mats) {
-            if (!m?.color) continue;
+            if (!m) continue;
+            if (m.map) {
+              m.map.colorSpace = THREE.SRGBColorSpace;
+              m.map.anisotropy = 4;
+            }
+            if (hasVC) {
+              m.vertexColors = true;
+              hasVertexColorAttr.add(m);
+            }
+            if (!m.color) continue;
             const nm = m.name || '';
             const luma = m.color.r * 0.299 + m.color.g * 0.587 + m.color.b * 0.114;
             if (luma < 0.035 && !nm.includes('Pupil') && !nm.includes('Eye')) {
@@ -103,6 +155,7 @@ export function ensureGlbModel(rawKey) {
               m.metalness = 0.72;
               m.roughness = Math.max(0.22, m.roughness);
             }
+            m.needsUpdate = true;
           }
         });
         root.updateMatrixWorld(true);
@@ -211,7 +264,8 @@ function setMatColor(mat, hex, emissiveHex = null, emissiveIntensity = null) {
 }
 
 /**
- * Dynamically recolors a cloned 3D prop across Style 0, Style 1, Style 2 & House palettes!
+ * Dynamically recolors a cloned 3D prop across Style 0, Style 1, Style 2 & House palettes
+ * while preserving natural hand-painted stone, marble, wood, brass, steel & water textures!
  */
 export function applyPropStyle3D(wrapper, rawKey, styleIdx = 0, style = null) {
   if (!wrapper) return;
@@ -220,6 +274,7 @@ export function applyPropStyle3D(wrapper, rawKey, styleIdx = 0, style = null) {
   const sec = style?.secondary || null;
   const acc = style?.accent || MAGIC_STYLE_HEX[sIdx];
   const isStatue = rawKey === 'g_prop_statue';
+  const isGazebo = rawKey === 'g_prop_gazebo';
 
   wrapper.traverse((node) => {
     if (!node.isMesh || !node.material) return;
@@ -228,34 +283,34 @@ export function applyPropStyle3D(wrapper, rawKey, styleIdx = 0, style = null) {
       if (!mat) continue;
       const nm = mat.name || '';
       if (nm.startsWith('Mat_Primary')) {
-        if (pri) setMatColor(mat, pri);
+        // Keep Gazebo's painted royal-blue star dome untouched on default Style 0
+        if (isGazebo && sIdx === 0) setMatColor(mat, '#ffffff');
+        else if (pri) setMatColor(mat, pri);
       } else if (nm.startsWith('Mat_Secondary')) {
-        if (sec) setMatColor(mat, sec);
+        if (sec && (sIdx > 0 || rawKey.startsWith('h_'))) setMatColor(mat, sec);
       } else if (nm.startsWith('Mat_Accent')) {
-        setMatColor(mat, acc);
+        if (sIdx > 0) setMatColor(mat, acc);
       } else if (
-        nm.startsWith('Mat_WaterCyan') ||
-        nm.startsWith('Mat_PotionGreen') ||
-        nm.startsWith('Mat_PotionPurple') ||
-        nm.startsWith('Mat_Emissive')
+        nm.startsWith('Mat_Emissive') &&
+        !nm.startsWith('Mat_EmissiveGreen') &&
+        !nm.startsWith('Mat_EmissiveViolet') &&
+        !nm.startsWith('Mat_EmissiveCyan')
       ) {
-        if (sIdx > 0 || style) {
-          const glowCol = sIdx === 0 ? (pri || MAGIC_STYLE_HEX[0]) : (acc || pri || MAGIC_STYLE_HEX[sIdx]);
-          setMatColor(mat, glowCol, glowCol, nm.startsWith('Mat_Emissive') ? 1.8 : 0.75);
+        if (sIdx > 0 && acc) {
+          setMatColor(mat, acc, acc, 1.9);
         }
       } else if (nm.startsWith('Mat_Wood') || nm.startsWith('Mat_Walnut')) {
-        if (sIdx > 0) setMatColor(mat, WOOD_STYLE_HEX[sIdx]);
+        setMatColor(mat, NATURAL_WOOD_TINTS[sIdx]);
       } else if (nm.startsWith('Mat_Stone') || nm.startsWith('Mat_Marble')) {
         if (isStatue) {
-          setMatColor(mat, sIdx === 1 ? '#cbd5e1' : sIdx === 2 ? '#fde68a' : '#e7e5e4');
-        } else if (sIdx > 0) {
-          setMatColor(mat, STONE_STYLE_HEX[sIdx]);
+          setMatColor(mat, sIdx === 1 ? '#dce6f5' : sIdx === 2 ? '#fef08a' : '#f5f5f4');
+        } else {
+          setMatColor(mat, NATURAL_STONE_TINTS[sIdx]);
         }
       } else if (isStatue && (nm.startsWith('Mat_Iron') || nm.startsWith('Mat_Steel'))) {
-        // Distinguish guardian statues from dark iron knights with bright alabaster/bronze finish!
-        setMatColor(mat, sIdx === 1 ? '#94a3b8' : sIdx === 2 ? '#eab308' : '#d6d3d1');
-        mat.roughness = 0.36;
-        mat.metalness = sIdx === 2 ? 0.72 : 0.25;
+        setMatColor(mat, sIdx === 1 ? '#cbd5e1' : sIdx === 2 ? '#fde047' : '#e7e5e4');
+        mat.roughness = 0.34;
+        mat.metalness = sIdx === 2 ? 0.68 : 0.28;
       }
     }
   });

@@ -5,7 +5,12 @@
  */
 
 import * as THREE from 'three';
-import { applyActorHouse3D, cloneGlbInstance, hasGlbLoaded } from './glbBank.js';
+import {
+  applyActorHouse3D,
+  cloneGlbInstance,
+  createContactShadowDisc,
+  hasGlbLoaded,
+} from './glbBank.js';
 
 function findNamedParts(root, names) {
   const out = {};
@@ -40,7 +45,8 @@ export class World3DActorsController {
         for (const k of Object.keys(this.prefectParts)) {
           this.prefectParts[k].userData.restRot = this.prefectParts[k].rotation.clone();
         }
-        this.parentGroup.add(this.prefect);
+        this.prefectShadow = createContactShadowDisc(0.5);
+        this.parentGroup.add(this.prefectShadow, this.prefect);
       }
     }
     if (this.prefect && this.prefectHouse !== house) {
@@ -69,6 +75,10 @@ export class World3DActorsController {
         ]);
         for (const k of Object.keys(this.petParts)) {
           this.petParts[k].userData.restRot = this.petParts[k].rotation.clone();
+        }
+        if (!this.petShadow) {
+          this.petShadow = createContactShadowDisc(0.45);
+          this.parentGroup.add(this.petShadow);
         }
         this.parentGroup.add(this.pet);
       }
@@ -107,6 +117,10 @@ export class World3DActorsController {
       const { x: wx, z: wz } = screenToWorldXZ(austinScreen.x, austinScreen.y);
       this.prefect.position.set(wx, 0, wz);
       this.prefect.scale.set(s, s * breathe, s);
+      if (this.prefectShadow) {
+        this.prefectShadow.position.set(wx, 0.4, wz);
+        this.prefectShadow.scale.set(52 * sc, 1, 52 * sc);
+      }
 
       // Default cozy three-quarter stance; turn left/right toward target while keeping 3/4 face visible!
       let targetYaw = isGarden ? -0.42 : 0.42;
@@ -161,6 +175,11 @@ export class World3DActorsController {
       const tapJump = Math.sin(petHop * Math.PI) * 26 * sc;
       this.pet.position.set(px, idleHop + tapJump, pz);
       this.pet.scale.setScalar(ps);
+      if (this.petShadow) {
+        const hopShrink = Math.max(0.58, 1 - (idleHop + tapJump) / Math.max(40, 80 * sc));
+        this.petShadow.position.set(px, 0.4, pz);
+        this.petShadow.scale.set(38 * sc * hopShrink, 1, 38 * sc * hopShrink);
+      }
 
       if (!isGarden) {
         this._petYaw = 0.22 + Math.sin(timeSec * 1.4) * 0.14;

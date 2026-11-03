@@ -39,3 +39,92 @@ export function bindGraphics3DToggle(rootEl, app, idPrefix = '', onRefresh = nul
     if (onRefresh) onRefresh();
   });
 }
+
+/**
+ * Wires Playrix 2025/2026 World HUD controls:
+ * 1) Clean Garden `🎨` Design Mode toggle (`#btn-design-mode`)
+ * 2) Collapsible Top-Right `🧭` Magic Menu drawer (`#btn-magic-menu` / `#magic-menu-drawer`)
+ * 3) Coin pill `+` shortcut to Diagon Alley Shop (`#hud-coin-pill`)
+ */
+export function initPlayrix2025Hud(app) {
+  const menuBtn = document.getElementById('btn-magic-menu');
+  const drawer = document.getElementById('magic-menu-drawer');
+  const designBtn = document.getElementById('btn-design-mode');
+  const coinPill = document.getElementById('hud-coin-pill');
+  const menuBadge = document.getElementById('magic-menu-badge');
+
+  const closeDrawer = () => {
+    if (!drawer || drawer.classList.contains('hidden')) return;
+    drawer.classList.add('hidden');
+    menuBtn?.classList.remove('is-active');
+    menuBtn?.setAttribute('aria-expanded', 'false');
+  };
+
+  if (menuBtn && drawer) {
+    menuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sound.sfxClick();
+      const willOpen = drawer.classList.contains('hidden');
+      drawer.classList.toggle('hidden', !willOpen);
+      menuBtn.classList.toggle('is-active', willOpen);
+      menuBtn.setAttribute('aria-expanded', String(willOpen));
+    });
+
+    drawer.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      if (!btn.classList.contains('world-zoom-btn') && btn.id !== 'btn-weather-cycle') {
+        closeDrawer();
+      }
+    });
+
+    document.addEventListener('pointerdown', (e) => {
+      if (drawer.classList.contains('hidden')) return;
+      if (!drawer.contains(e.target) && !menuBtn.contains(e.target)) closeDrawer();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDrawer();
+    });
+  }
+
+  if (designBtn) {
+    designBtn.addEventListener('click', () => {
+      sound.sfxClick();
+      const next = !Boolean(app.gardenRenderer?.designMode);
+      if (app.gardenRenderer) app.gardenRenderer.designMode = next;
+      if (app.homeRenderer) app.homeRenderer.designMode = next;
+      designBtn.classList.toggle('is-active', next);
+      designBtn.setAttribute('aria-pressed', String(next));
+      app.toast?.(
+        next
+          ? '🎨 Chế độ Đổi Kiểu BẬT: Chạm vào bất kỳ cổ vật/nội thất nào đã xây để đổi 3 phong cách!'
+          : '🌿 Chế độ Ngắm Cảnh Sạch: Nhấn giữ 0.4s vào cổ vật bất kỳ khi muốn đổi kiểu!'
+      );
+    });
+  }
+
+  if (coinPill) {
+    coinPill.addEventListener('click', () => {
+      document.getElementById('btn-open-shop')?.click();
+    });
+  }
+
+  const syncMenuBadge = () => {
+    if (!menuBadge) return;
+    const n1 = Number(document.getElementById('online-badge')?.textContent || 0) || 0;
+    const n2 = Number(document.getElementById('events-badge')?.textContent || 0) || 0;
+    const hide1 = document.getElementById('online-badge')?.classList.contains('hidden') ?? true;
+    const hide2 = document.getElementById('events-badge')?.classList.contains('hidden') ?? true;
+    const total = (hide1 ? 0 : n1) + (hide2 ? 0 : n2);
+    menuBadge.textContent = String(total);
+    menuBadge.classList.toggle('hidden', total <= 0);
+  };
+
+  const obs = new MutationObserver(syncMenuBadge);
+  for (const id of ['online-badge', 'events-badge']) {
+    const el = document.getElementById(id);
+    if (el) obs.observe(el, { attributes: true, childList: true, characterData: true });
+  }
+  syncMenuBadge();
+}

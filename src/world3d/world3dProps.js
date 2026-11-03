@@ -7,7 +7,12 @@
 import * as THREE from 'three';
 import { GARDEN_ANCHORS, ZONE_RELIC_PROPS } from '../world/gardenscapesSlots.js';
 import { ROOM_ANCHORS } from '../world/homescapesSlotsExtra.js';
-import { applyPropStyle3D, cloneGlbInstance, hasGlbLoaded } from './glbBank.js';
+import {
+  applyPropStyle3D,
+  cloneGlbInstance,
+  createContactShadowDisc,
+  hasGlbLoaded,
+} from './glbBank.js';
 
 const ALCOVE_SPEC = [
   { key: 'g_prop_telescope', size: 128 },
@@ -198,6 +203,7 @@ export class World3DPropsManager {
 
       if (rec && rec.propKey !== d.propKey) {
         this.parentGroup.remove(rec.mesh);
+        if (rec.shadowDisc) this.parentGroup.remove(rec.shadowDisc);
         this.instances.delete(d.slotId);
         rec = null;
       }
@@ -211,8 +217,14 @@ export class World3DPropsManager {
         if (!mesh) continue;
         applyPropStyle3D(mesh, d.propKey, d.styleIdx, d.style);
         this.parentGroup.add(mesh);
+        let shadowDisc = null;
+        if (!d.flatFloor && !d.hanging && d.propKey !== 'g_prop_boat') {
+          shadowDisc = createContactShadowDisc(0.44);
+          this.parentGroup.add(shadowDisc);
+        }
         rec = {
           mesh,
+          shadowDisc,
           propKey: d.propKey,
           styleSig,
           bornAt: timeSec,
@@ -261,11 +273,20 @@ export class World3DPropsManager {
       rec.mesh.position.set(wx, liftY, wz);
       rec.mesh.scale.setScalar(baseScale);
       rec.mesh.rotation.set(pitchX, d.yaw + spinY, rollZ);
+
+      if (rec.shadowDisc) {
+        rec.shadowDisc.position.set(wx, 0.35, wz);
+        const sx = Math.max(26, entry.sizeX * baseScale * 1.18);
+        const sz = Math.max(26, entry.sizeZ * baseScale * 1.18);
+        rec.shadowDisc.scale.set(sx, 1, sz);
+        rec.shadowDisc.rotation.y = d.yaw;
+      }
     }
 
     for (const [id, rec] of this.instances.entries()) {
       if (!activeIds.has(id)) {
         this.parentGroup.remove(rec.mesh);
+        if (rec.shadowDisc) this.parentGroup.remove(rec.shadowDisc);
         this.instances.delete(id);
       }
     }
