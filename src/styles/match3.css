@@ -1,0 +1,230 @@
+/**
+ * Playrix Match-3 Stage, Ornate Left Plaque, Circular Rainbow Dial & Right Booster Medallions
+ */
+
+.match3-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 242px 1fr 112px;
+  gap: 12px;
+  padding: 12px 16px 14px;
+  align-items: center;
+  background-image: linear-gradient(rgba(18, 12, 28, 0.58), rgba(18, 12, 28, 0.72)), var(--m3-bg-url, none);
+  background-size: cover;
+  background-position: center;
+}
+
+.austin-m3-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #fff3d6, #ffe8a3);
+  border: 2px solid #e09f3e;
+  border-radius: 16px;
+  padding: 6px 10px;
+}
+
+.austin-m3-card img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.rainbow-dial-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.rainbow-dial-ring {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  padding: 5px;
+  background: conic-gradient(#ff595e, #ffca3a, #8ac926, #1982c4, #b5179e var(--charge-deg, 0deg), rgba(255, 255, 255, 0.16) 0deg);
+  display: grid;
+  place-items: center;
+}
+
+.rainbow-dial-ring img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #0f291e;
+  padding: 3px;
+}
+
+.m3-left-panel {
+  background: rgba(255, 249, 236, 0.96);
+  color: var(--text-dark);
+  border: 3px solid var(--panel-border);
+  border-radius: 22px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
+}
+
+.moves-box {
+  background: linear-gradient(180deg, #780000, #370617);
+  border: 2px solid #ffd166;
+  color: #ffffff;
+  border-radius: 16px;
+  padding: 10px;
+  text-align: center;
+}
+
+.moves-box .moves-num {
+  font-size: 2.2rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #ffd166;
+}
+
+.goals-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.goal-chip {
+  background: #ffffff;
+  border: 2px solid #e9c46a;
+  border-radius: 14px;
+  padding: 6px 10px;
+  min-width: 64px;
+  text-align: center;
+  font-weight: 800;
+}
+
+.goal-chip.done {
+  border-color: #2b8a3e;
+  background: #d3f9d8;
+}
+
+.rainbow-meter-card {
+  background: linear-gradient(180deg, #1b4332, #081c15);
+  color: #ffffff;
+  border-radius: 14px;
+  padding: 9px 10px;
+  text-align: center;
+}
+
+.rainbow-bar-track {
+  width: 100%;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.rainbow-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #ff595e, #ffca3a, #8ac926, #1982c4, #b5179e);
+  transition: width 0.25s ease-out;
+}
+
+.m3-canvas-wrap {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  position: relative;
+}
+
+.m3-canvas-wrap canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.m3-boosters-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.booster-btn {
+  width: 78px;
+  padding: 8px 6px;
+  border-radius: 18px;
+  border: 2.5px solid #ffd166;
+  background: rgba(34, 24, 48, 0.9);
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-weight: 800;
+  font-size: 0.78rem;
+}
+
+.booster-btn.armed {
+  background: #ff9f1c;
+  color: #1b263b;
+  transform: scale(1.07);
+}
+
+.m3-pause-btn {
+  width: 52px;
+  height: 52px;
+  margin-top: 6px;
+  border-radius: 50%;
+  border: 2.5px solid #ffd166;
+  background: linear-gradient(180deg, #5a189a, #240046);
+  color: #ffffff;
+  font-size: 1.35rem;
+  cursor: pointer;
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.45);
+}
+
+@media (max-width: 860px) and (orientation: portrait) {
+  .match3-stage {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    gap: 8px;
+    padding: 6px 10px 10px;
+  }
+  .m3-left-panel {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 10px;
+  }
+  .moves-box {
+    padding: 6px 12px;
+  }
+  .moves-box .moves-num {
+    font-size: 1.55rem;
+  }
+  .rainbow-meter-card {
+    padding: 6px 10px;
+  }
+  .rainbow-dial-ring {
+    width: 42px;
+    height: 42px;
+  }
+  .rainbow-dial-ring img {
+    width: 30px;
+    height: 30px;
+  }
+  .m3-boosters-col {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+

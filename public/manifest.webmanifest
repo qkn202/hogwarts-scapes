@@ -1,0 +1,30 @@
+{
+  "name": "Wizarding Scapes: Lâu Đài & Khuôn Viên Hogwarts 77,777",
+  "short_name": "Hogwarts 77K",
+  "description": "Game Match-3 Hardcore 77.777 màn kết hợp cải tạo Lâu Đài & Khuôn Viên Hogwarts 2.5D cùng Hội Nhà Online.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#071b11",
+  "theme_color": "#0d3b24",
+  "icons": [
+    {
+      "src": "/assets/icon-192.webp",
+      "sizes": "192x192",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/char-puppy.webp",
+      "sizes": "256x256",
+      "type": "image/webp",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icon-512.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    }
+  ]
+}

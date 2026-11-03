@@ -1,0 +1,148 @@
+/**
+ * Ultra-Compact Mobile Viewport Refinements (320px SE Portrait & <=720px Compact Landscape)
+ * Prevents HUD, Bottom Dock, and 3-Style Picker clipping on narrow mobile screens.
+ */
+
+@media (max-width: 359px) and (orientation: portrait) {
+  .scapes-shell.scapes-shell .top-hud {
+    gap: 3px;
+    padding: calc(var(--safe-top) + 5px) calc(var(--safe-right) + 4px) 5px calc(var(--safe-left) + 4px);
+  }
+  .scapes-shell .hud-group {
+    gap: 3px;
+    min-width: 0;
+  }
+  .scapes-shell.scapes-shell .hud-pill {
+    padding: 3px 5px;
+    font-size: 0.7rem;
+    gap: 2px;
+    border-radius: 8px;
+  }
+  .scapes-shell.scapes-shell .top-hud .btn-playrix {
+    padding: 4px 6px;
+    min-width: 30px;
+    min-height: 32px;
+    font-size: 0.76rem;
+    border-radius: 10px;
+  }
+  .scapes-shell.scapes-shell .area-banner {
+    top: calc(var(--safe-top) + 48px);
+    max-width: calc(100dvw - 14px);
+    padding: 4px 8px;
+    gap: 5px;
+  }
+  .scapes-shell.scapes-shell .area-banner strong {
+    max-width: calc(100dvw - 96px);
+    font-size: 0.74rem;
+  }
+  .world-side-rail {
+    top: calc(env(safe-area-inset-top, 0px) + 98px);
+    gap: 5px;
+  }
+  .world-rail-btn {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+    border-radius: 12px;
+    font-size: 1rem;
+  }
+  .scapes-shell.scapes-shell .world-dock {
+    left: calc(var(--safe-left) + 5px);
+    right: calc(var(--safe-right) + 5px);
+    bottom: calc(var(--safe-bottom) + 8px);
+    gap: 4px;
+  }
+  .scapes-shell .dock-left {
+    gap: 4px;
+  }
+  .scapes-shell.scapes-shell .dock-left .btn-playrix {
+    padding: 6px 6px;
+    font-size: 0.68rem;
+    min-height: 40px;
+    gap: 3px;
+    border-radius: 12px;
+  }
+  .scapes-shell .dock-left .notif-badge {
+    min-width: 17px;
+    height: 17px;
+    font-size: 0.64rem;
+    padding: 0 3px;
+  }
+  .scapes-shell.scapes-shell .play-level-cta {
+    padding: 6px 8px !important;
+    min-height: 42px;
+    max-width: 104px;
+    border-radius: 15px;
+  }
+  .scapes-shell[data-game='gardenscapes'] .play-level-cta #btn-play-level-num {
+    font-size: 0.86rem;
+  }
+  .scapes-shell .play-level-cta small {
+    font-size: 0.58rem;
+    max-width: 88px;
+  }
+  .scapes-shell .style-picker-bar {
+    left: calc(var(--safe-left) + 5px);
+    right: calc(var(--safe-right) + 5px);
+    padding: 6px 7px !important;
+    gap: 5px;
+  }
+  .scapes-shell .style-picker-actions .btn-playrix {
+    padding: 5px 8px;
+    font-size: 0.74rem;
+    min-height: 32px;
+  }
+  .scapes-shell .style-option-btn {
+    padding: 5px 3px;
+    font-size: 0.66rem;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 540px) and (max-width: 720px) {
+  .scapes-shell .style-picker-bar {
+    left: calc(var(--safe-left) + 8px);
+    right: calc(var(--safe-right) + 8px);
+    transform: none;
+    max-width: none;
+    padding: 4px 8px !important;
+    gap: 6px;
+  }
+  .scapes-shell .style-picker-title {
+    display: none;
+  }
+  .scapes-shell .style-picker-grid {
+    flex: 1 1 0;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 5px;
+  }
+  .scapes-shell .style-option-btn {
+    min-width: 0;
+    overflow: hidden;
+    padding: 4px 6px;
+    gap: 4px;
+    font-size: 0.68rem;
+  }
+  .scapes-shell .style-swatch {
+    width: 18px;
+    height: 16px;
+  }
+  .scapes-shell .style-option-name {
+    min-width: 0;
+    max-width: none;
+    flex: 1 1 0;
+    text-align: left;
+  }
+  .scapes-shell .style-picker-actions {
+    flex-shrink: 0;
+    gap: 5px;
+  }
+  .scapes-shell .style-picker-actions .btn-playrix {
+    padding: 5px 8px;
+    font-size: 0.72rem;
+    min-height: 32px;
+  }
+}
+

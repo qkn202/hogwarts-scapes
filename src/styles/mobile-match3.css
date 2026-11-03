@@ -1,0 +1,319 @@
+/**
+ * Mobile Match-3 Dual-Orientation Layout (Portrait 3-Row Stack & Landscape 3-Column Grid)
+ * Ensures the 8x8 Hogwarts board, Moves, Goals, Patronus Dial, and Boosters fit 100% cleanly.
+ */
+
+/* 1. MATCH-3 MOBILE PORTRAIT: Compact 2-Row Top Grimoire + Full-Width Board + Thumb Dock */
+@media (max-width: 860px) and (orientation: portrait) {
+  .scapes-shell .match3-stage {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 6px;
+    padding: calc(var(--safe-top) + 6px) calc(var(--safe-right) + 6px) calc(var(--safe-bottom) + 8px) calc(var(--safe-left) + 6px);
+  }
+
+  .scapes-shell .m3-left-panel {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'meta meta score'
+      'moves goals patronus';
+    align-items: center;
+    gap: 5px 8px;
+    padding: 7px 10px !important;
+    border-radius: 14px;
+  }
+
+  .scapes-shell .austin-m3-card {
+    grid-area: meta;
+    padding: 3px 8px !important;
+    gap: 6px;
+    justify-self: start;
+  }
+
+  .scapes-shell .austin-m3-card img {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .scapes-shell #m3-level-label {
+    font-size: 0.86rem !important;
+  }
+
+  .scapes-shell #m3-austin-mood {
+    font-size: 0.68rem !important;
+  }
+
+  .scapes-shell .m3-score-row {
+    grid-area: score;
+    justify-self: end;
+    font-size: 0.76rem !important;
+    white-space: nowrap;
+  }
+
+  .scapes-shell .moves-box {
+    grid-area: moves;
+    padding: 4px 10px;
+    border-radius: 11px;
+  }
+
+  .scapes-shell .moves-box .moves-label {
+    font-size: 0.6rem !important;
+  }
+
+  .scapes-shell .moves-box .moves-num {
+    font-size: 1.45rem;
+  }
+
+  .scapes-shell .m3-goals-sec {
+    grid-area: goals;
+    min-width: 0;
+  }
+
+  .scapes-shell .m3-goals-sec .m3-sec-label {
+    display: none;
+  }
+
+  .scapes-shell .goals-grid {
+    gap: 5px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .scapes-shell .goal-chip {
+    padding: 4px 7px;
+    min-width: 48px;
+    font-size: 0.82rem;
+  }
+
+  .scapes-shell #garden-rainbow-meter {
+    grid-area: patronus;
+    padding: 4px 7px;
+    border-radius: 11px;
+  }
+
+  .scapes-shell #garden-rainbow-meter .rainbow-dial-wrap {
+    margin-top: 0;
+    gap: 5px;
+  }
+
+  .scapes-shell #garden-rainbow-meter .rainbow-title,
+  .scapes-shell #garden-rainbow-meter .rainbow-bar-track {
+    display: none;
+  }
+
+  .scapes-shell #garden-rainbow-meter .rainbow-dial-ring {
+    width: 36px;
+    height: 36px;
+    padding: 3px;
+  }
+
+  .scapes-shell #garden-rainbow-meter .rainbow-dial-ring img {
+    width: 26px;
+    height: 26px;
+  }
+
+  .scapes-shell #rainbow-charge-pct {
+    font-size: 0.82rem !important;
+  }
+
+  .scapes-shell .m3-boosters-col {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .scapes-shell .booster-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    width: auto !important;
+    max-width: 96px;
+    min-height: 54px;
+    padding: 5px 4px;
+    font-size: 0.68rem;
+    gap: 2px;
+  }
+
+  .scapes-shell .booster-btn > span:nth-child(2) {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .scapes-shell .m3-pause-btn {
+    width: 46px;
+    height: 46px;
+    margin-top: 0;
+    flex-shrink: 0;
+    font-size: 1.15rem;
+  }
+}
+
+@media (max-width: 359px) and (orientation: portrait) {
+  .scapes-shell .m3-left-panel {
+    gap: 4px 6px;
+    padding: 6px 7px !important;
+  }
+  .scapes-shell .m3-boosters-col {
+    gap: 4px;
+  }
+  .scapes-shell .booster-btn {
+    min-width: 0;
+    padding: 4px 3px;
+    min-height: 50px;
+    font-size: 0.62rem;
+    border-radius: 11px;
+  }
+  .scapes-shell .m3-pause-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1.05rem;
+  }
+}
+
+/* 2. MATCH-3 MOBILE LANDSCAPE: 3-Column Horizontal Playrix Layout */
+@media (orientation: landscape) and (max-height: 540px) {
+  .scapes-shell .match3-stage {
+    grid-template-columns: minmax(136px, 168px) minmax(0, 1fr) minmax(72px, 84px);
+    grid-template-rows: minmax(0, 1fr);
+    gap: 8px;
+    padding: max(4px, var(--safe-top)) max(10px, var(--safe-right)) max(4px, var(--safe-bottom)) max(10px, var(--safe-left));
+  }
+
+  .scapes-shell .m3-left-panel {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 4px;
+    padding: 7px 8px !important;
+    max-height: 100%;
+    overflow: hidden;
+    border-radius: 14px;
+  }
+
+  .scapes-shell .austin-m3-card {
+    padding: 3px 6px !important;
+    gap: 6px;
+  }
+
+  .scapes-shell .austin-m3-card img {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .scapes-shell #m3-level-label {
+    font-size: 0.84rem !important;
+  }
+
+  .scapes-shell #m3-austin-mood {
+    display: none;
+  }
+
+  .scapes-shell .moves-box {
+    padding: 4px 6px;
+    border-radius: 10px;
+  }
+
+  .scapes-shell .moves-box .moves-label {
+    font-size: 0.6rem !important;
+  }
+
+  .scapes-shell .moves-box .moves-num {
+    font-size: 1.32rem;
+  }
+
+  .scapes-shell .m3-goals-sec .m3-sec-label {
+    display: none;
+  }
+
+  .scapes-shell .goals-grid {
+    gap: 4px;
+  }
+
+  .scapes-shell .goal-chip {
+    padding: 3px 6px;
+    min-width: 42px;
+    font-size: 0.76rem;
+    border-radius: 9px;
+  }
+
+  .scapes-shell #garden-rainbow-meter {
+    padding: 4px 6px;
+    border-radius: 10px;
+  }
+
+  .scapes-shell #garden-rainbow-meter .rainbow-dial-wrap {
+    margin-top: 0;
+    gap: 6px;
+  }
+
+  .scapes-shell #garden-rainbow-meter .rainbow-title {
+    font-size: 0.6rem !important;
+  }
+
+  .scapes-shell #garden-rainbow-meter .rainbow-dial-ring {
+    width: 30px;
+    height: 30px;
+    padding: 3px;
+  }
+
+  .scapes-shell #garden-rainbow-meter .rainbow-dial-ring img {
+    width: 22px;
+    height: 22px;
+  }
+
+  .scapes-shell #rainbow-charge-pct {
+    font-size: 0.82rem !important;
+  }
+
+  .scapes-shell #garden-rainbow-meter .rainbow-bar-track {
+    height: 6px;
+    margin-top: 3px;
+  }
+
+  .scapes-shell .m3-score-row {
+    font-size: 0.7rem !important;
+  }
+
+  .scapes-shell .m3-boosters-col {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .scapes-shell .booster-btn {
+    width: 74px !important;
+    min-height: 52px;
+    padding: 3px 4px;
+    gap: 1px;
+    font-size: 0.64rem;
+    border-radius: 11px;
+  }
+
+  .scapes-shell .booster-btn > span:first-child {
+    height: 24px !important;
+    transform: scale(0.84);
+  }
+
+  .scapes-shell .booster-btn > span:nth-child(2) {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .scapes-shell .m3-pause-btn {
+    width: 40px;
+    height: 40px;
+    margin-top: 1px;
+    font-size: 1.05rem;
+  }
+}
+

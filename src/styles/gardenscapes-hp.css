@@ -1,0 +1,487 @@
+/* Gardenscapes — Harry Potter Hogwarts Grounds Bespoke UI Theme */
+
+:root {
+  --hp-parchment-top: #fbf3de;
+  --hp-parchment-mid: #efe0b9;
+  --hp-parchment-btm: #dcc490;
+  --hp-parchment-card: #faf0d7;
+  --hp-ink-dark: #231509;
+  --hp-ink-soft: #593d20;
+  --hp-brass-hi: #ffea9c;
+  --hp-brass-mid: #d4af37;
+  --hp-brass-lo: #8c6214;
+  --hp-brass-rim: #4b3206;
+  --hp-emerald-hi: #38b87c;
+  --hp-emerald-mid: #166541;
+  --hp-emerald-lo: #0b3923;
+  --hp-emerald-abyss: #051e12;
+  --hp-wax-hi: #d63638;
+  --hp-wax-lo: #7a1116;
+  --hp-font-serif: 'Cinzel', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+}
+
+/* 1. SHELL & TOP HUD */
+
+.scapes-shell[data-game='gardenscapes'] {
+  --accent-top: var(--hp-emerald-hi);
+  --accent-btm: var(--hp-emerald-lo);
+  background: radial-gradient(circle at 50% 35%, #133a26 0%, #071910 100%);
+}
+
+.scapes-shell[data-game='gardenscapes'] .top-hud {
+  padding: 12px 18px;
+}
+
+.scapes-shell[data-game='gardenscapes'] .hud-pill {
+  position: relative;
+  background:
+    radial-gradient(ellipse at 20% 15%, rgba(255, 255, 255, 0.55), transparent 60%),
+    linear-gradient(180deg, var(--hp-parchment-top) 0%, var(--hp-parchment-mid) 58%, var(--hp-parchment-btm) 100%);
+  color: var(--hp-ink-dark);
+  border: 2.5px solid var(--hp-brass-mid);
+  border-radius: 12px;
+  padding: 6px 15px;
+  font-weight: 800;
+  box-shadow:
+    0 0 0 2px var(--hp-emerald-lo),
+    0 5px 14px rgba(0, 0, 0, 0.52),
+    inset 0 1px 0 #fffdf7,
+    inset 0 -2px 4px rgba(138, 96, 20, 0.28);
+}
+
+.scapes-shell[data-game='gardenscapes'] .hud-pill::before,
+.scapes-shell[data-game='gardenscapes'] .hud-pill::after {
+  content: '❖';
+  content: '❖' / '';
+  font-size: 0.62rem;
+  color: var(--hp-emerald-mid);
+  opacity: 0.85;
+}
+
+.scapes-shell[data-game='gardenscapes'] .world-canvas-wrap canvas {
+  cursor: default;
+}
+
+.scapes-shell[data-game='gardenscapes'] #hud-game-title {
+  font-family: var(--hp-font-serif);
+  letter-spacing: 0.04em;
+  background:
+    linear-gradient(180deg, #1b6944 0%, #0c3923 100%);
+  color: var(--hp-brass-hi);
+  border: 2.5px solid var(--hp-brass-mid);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+  padding: 6px 16px;
+}
+
+.scapes-shell[data-game='gardenscapes'] #hud-game-title::before,
+.scapes-shell[data-game='gardenscapes'] #hud-game-title::after {
+  color: var(--hp-brass-hi);
+}
+
+/* Hogwarts Crest SVG inline emblem inside HUD & Left Grimoire */
+.hp-crest-svg {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55));
+}
+
+/* 2. HOGWARTS BRASS & EMERALD TACTILE BUTTONS */
+
+:is(.scapes-shell[data-game='gardenscapes'], body[data-forced-game='gardenscapes'], body[data-active-game='gardenscapes']) .btn-playrix {
+  border-radius: 12px;
+  border: 2px solid var(--hp-brass-hi);
+  background: linear-gradient(180deg, var(--hp-emerald-hi) 0%, var(--hp-emerald-mid) 52%, var(--hp-emerald-lo) 100%);
+  color: #fff9e6;
+  letter-spacing: 0.015em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.72);
+  box-shadow:
+    0 3px 0 var(--hp-brass-rim),
+    0 0 0 1.5px var(--hp-brass-lo),
+    0 7px 16px rgba(0, 0, 0, 0.46),
+    inset 0 1px 1px rgba(255, 250, 220, 0.55);
+}
+
+:is(.scapes-shell[data-game='gardenscapes'], body[data-forced-game='gardenscapes'], body[data-active-game='gardenscapes']) .btn-playrix.btn-gold {
+  background: linear-gradient(180deg, #ffedb0 0%, #e0a832 52%, #9e690b 100%);
+  border-color: #fff6d1;
+  color: var(--hp-ink-dark);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 3px 0 #593904,
+    0 0 0 1.5px #382302,
+    0 7px 16px rgba(0, 0, 0, 0.45),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+:is(.scapes-shell[data-game='gardenscapes'], body[data-forced-game='gardenscapes'], body[data-active-game='gardenscapes']) .btn-playrix.btn-purple {
+  background: linear-gradient(180deg, #3c5482 0%, #1d2d52 55%, #101a33 100%);
+  border-color: var(--hp-brass-mid);
+  color: #fcefb4;
+  box-shadow:
+    0 3px 0 #090f1f,
+    0 0 0 1.5px var(--hp-brass-lo),
+    0 7px 16px rgba(0, 0, 0, 0.48),
+    inset 0 1px 1px rgba(255, 236, 179, 0.35);
+}
+
+:is(.scapes-shell[data-game='gardenscapes'], body[data-forced-game='gardenscapes'], body[data-active-game='gardenscapes']) .btn-playrix.btn-red {
+  background: linear-gradient(180deg, var(--hp-wax-hi) 0%, #991b20 55%, var(--hp-wax-lo) 100%);
+  border-color: var(--hp-brass-hi);
+  color: #fff8e7;
+  box-shadow:
+    0 3px 0 #47070a,
+    0 0 0 1.5px var(--hp-brass-lo),
+    0 7px 16px rgba(0, 0, 0, 0.48);
+}
+
+/* 3. UNFURLED HOGWARTS PARCHMENT AREA SCROLL & GRAND SPELL CTA */
+
+.scapes-shell[data-game='gardenscapes'] .area-banner {
+  top: 60px;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255, 253, 244, 0.7), transparent 70%),
+    linear-gradient(180deg, #fcf4df 0%, #ecd9ae 55%, #d6bc84 100%);
+  color: var(--hp-ink-dark);
+  border: 2.5px solid var(--hp-brass-lo);
+  border-radius: 10px;
+  padding: 7px 20px;
+  box-shadow:
+    0 0 0 2px var(--hp-emerald-lo),
+    0 10px 24px rgba(0, 0, 0, 0.52),
+    inset 0 1px 0 #fffef9;
+}
+
+/* Rolled Parchment Scroll Spindles on Left & Right */
+.scapes-shell[data-game='gardenscapes'] .area-banner::before,
+.scapes-shell[data-game='gardenscapes'] .area-banner::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  width: 11px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #7c5410, #ffd978 48%, #6e490b);
+  border: 1.5px solid #3d2704;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45);
+}
+
+.scapes-shell[data-game='gardenscapes'] .area-banner::before {
+  left: -8px;
+}
+
+.scapes-shell[data-game='gardenscapes'] .area-banner::after {
+  right: -8px;
+}
+
+.scapes-shell[data-game='gardenscapes'] .area-banner strong {
+  font-family: var(--hp-font-serif);
+  font-size: 0.98rem;
+  letter-spacing: 0.02em;
+  color: var(--hp-ink-dark);
+}
+
+.scapes-shell[data-game='gardenscapes'] .area-banner button {
+  background: linear-gradient(180deg, var(--hp-emerald-hi), var(--hp-emerald-lo));
+  color: var(--hp-brass-hi);
+  border: 1.5px solid var(--hp-brass-mid);
+  width: 30px;
+  height: 30px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+}
+
+.scapes-shell[data-game='gardenscapes'] .play-level-cta {
+  position: relative;
+  padding: 13px 30px;
+  border-radius: 14px;
+  border: 2.5px solid var(--hp-brass-hi);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(116, 242, 182, 0.35), transparent 62%),
+    linear-gradient(180deg, #228b59 0%, #104f31 58%, #082b1a 100%);
+  box-shadow:
+    0 4px 0 var(--hp-brass-rim),
+    0 0 0 2.5px var(--hp-brass-mid),
+    0 12px 28px rgba(0, 0, 0, 0.62),
+    inset 0 1px 2px rgba(255, 245, 200, 0.7);
+}
+
+.scapes-shell[data-game='gardenscapes'] .play-level-cta #btn-play-level-num {
+  font-family: var(--hp-font-serif);
+  font-size: 1.22rem;
+  color: var(--hp-brass-hi);
+  letter-spacing: 0.05em;
+}
+
+/* 4. 3-STYLE RENOVATION BAR — ENCHANTED PARCHMENT FOLIO */
+
+.scapes-shell[data-game='gardenscapes'] .style-picker-bar {
+  bottom: 12px;
+  padding: 9px 14px;
+  background:
+    radial-gradient(circle at 50% 10%, rgba(255, 253, 245, 0.78), transparent 70%),
+    linear-gradient(180deg, #fbf2dc 0%, #ead6ab 100%);
+  color: var(--hp-ink-dark);
+  border: 3px solid var(--hp-brass-mid);
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 3px var(--hp-emerald-lo),
+    0 16px 40px rgba(0, 0, 0, 0.65);
+}
+
+.scapes-shell[data-game='gardenscapes'] .world-stage {
+  --dock-opacity: 1;
+  --dock-events: auto;
+}
+.scapes-shell[data-game='gardenscapes'] .world-stage:has(#style-picker-bar:not(.hidden)) {
+  --dock-opacity: 0;
+  --dock-events: none;
+}
+.scapes-shell[data-game='gardenscapes'] .world-dock {
+  opacity: var(--dock-opacity);
+  pointer-events: var(--dock-events);
+}
+
+.scapes-shell[data-game='gardenscapes'] .style-option-btn {
+  background: #fffaf0;
+  border: 2px solid #c9ab6d;
+  border-radius: 12px;
+  color: var(--hp-ink-dark);
+}
+
+.scapes-shell[data-game='gardenscapes'] .style-option-btn.active {
+  background: linear-gradient(180deg, #e8f8ee 0%, #ccebd8 100%);
+  border-color: var(--hp-emerald-mid);
+  box-shadow: 0 0 0 2px var(--hp-brass-mid), 0 6px 14px rgba(11, 57, 35, 0.28);
+}
+
+/* 5. MATCH-3 STAGE — HOGWARTS HERBOLOGY GRIMOIRE & BRASS ASTROLABE */
+
+.scapes-shell[data-game='gardenscapes'] .match3-stage {
+  background-image:
+    radial-gradient(circle at 50% 50%, rgba(10, 42, 26, 0.48), rgba(5, 20, 13, 0.84)),
+    var(--m3-bg-url, none);
+}
+
+.scapes-shell[data-game='gardenscapes'] .m3-left-panel {
+  position: relative;
+  background:
+    radial-gradient(circle at 50% 12%, rgba(255, 253, 246, 0.72), transparent 68%),
+    linear-gradient(180deg, var(--hp-parchment-top) 0%, var(--hp-parchment-mid) 56%, var(--hp-parchment-btm) 100%);
+  color: var(--hp-ink-dark);
+  border: 3px solid var(--hp-brass-mid);
+  border-radius: 16px;
+  padding: 15px 14px;
+  box-shadow:
+    0 0 0 3px var(--hp-emerald-lo),
+    0 14px 34px rgba(0, 0, 0, 0.62),
+    inset 0 0 0 2px rgba(138, 96, 20, 0.3);
+}
+
+.scapes-shell[data-game='gardenscapes'] .austin-m3-card {
+  background: linear-gradient(135deg, #134e32 0%, #09291a 100%);
+  border: 2px solid var(--hp-brass-mid);
+  border-radius: 12px;
+  color: var(--hp-brass-hi);
+  padding: 7px 10px;
+  box-shadow: inset 0 1px 0 rgba(255, 238, 173, 0.35);
+}
+
+.scapes-shell[data-game='gardenscapes'] .austin-m3-card img {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #2b8a5e, #0b2e1d);
+  border: 2px solid var(--hp-brass-hi);
+  padding: 2px;
+}
+
+.scapes-shell[data-game='gardenscapes'] #m3-austin-mood {
+  color: #cfead9 !important;
+}
+
+.scapes-shell[data-game='gardenscapes'] .moves-box {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(63, 201, 134, 0.28), transparent 65%),
+    linear-gradient(180deg, #14492f 0%, #072114 100%);
+  border: 2.5px solid var(--hp-brass-mid);
+  border-radius: 14px;
+  box-shadow:
+    inset 0 0 12px rgba(0, 0, 0, 0.45),
+    0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+.scapes-shell[data-game='gardenscapes'] .moves-box .moves-num {
+  font-family: var(--hp-font-serif);
+  color: var(--hp-brass-hi);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.65);
+}
+
+.scapes-shell[data-game='gardenscapes'] .goal-chip {
+  background: linear-gradient(180deg, #fffdf7 0%, #f2e4c2 100%);
+  border: 2px solid #b88b28;
+  border-radius: 11px;
+  color: var(--hp-ink-dark);
+  box-shadow: 0 2px 5px rgba(45, 28, 10, 0.16);
+}
+
+.scapes-shell[data-game='gardenscapes'] .goal-chip.done {
+  background: linear-gradient(180deg, #daf5e4 0%, #b3e5c7 100%);
+  border-color: var(--hp-emerald-mid);
+  color: var(--hp-emerald-lo);
+}
+
+.scapes-shell[data-game='gardenscapes'] .rainbow-meter-card {
+  background: linear-gradient(180deg, #103528 0%, #071b16 100%);
+  border: 2px solid var(--hp-brass-mid);
+  border-radius: 13px;
+  box-shadow: inset 0 1px 0 rgba(255, 236, 179, 0.25);
+}
+
+.scapes-shell[data-game='gardenscapes'] .rainbow-dial-ring {
+  background: conic-gradient(
+    #72efdd,
+    #48cae4,
+    #ffd166,
+    #52b788,
+    #b8f2e6 var(--charge-deg, 0deg),
+    rgba(255, 255, 255, 0.14) 0deg
+  );
+  box-shadow: 0 0 10px rgba(114, 239, 221, 0.35);
+}
+
+.scapes-shell[data-game='gardenscapes'] .rainbow-bar-fill {
+  background: linear-gradient(90deg, #38b87c, #48cae4, #b8f2e6, #ffd166);
+}
+
+.scapes-shell[data-game='gardenscapes'] .booster-btn {
+  width: 84px;
+  border-radius: 14px;
+  border: 2px solid var(--hp-brass-mid);
+  background:
+    radial-gradient(circle at 50% 20%, rgba(56, 184, 124, 0.24), transparent 70%),
+    linear-gradient(180deg, #143d29 0%, #081f14 100%);
+  color: #fef6df;
+  box-shadow:
+    0 0 0 1.5px var(--hp-brass-rim),
+    0 6px 14px rgba(0, 0, 0, 0.5);
+}
+
+.scapes-shell[data-game='gardenscapes'] .booster-btn.armed {
+  background: linear-gradient(180deg, #ffea9c 0%, #d49b24 100%);
+  color: var(--hp-ink-dark);
+  border-color: #ffffff;
+}
+
+.scapes-shell[data-game='gardenscapes'] .m3-pause-btn {
+  border: 2px solid var(--hp-brass-hi);
+  background: linear-gradient(180deg, var(--hp-emerald-mid), var(--hp-emerald-abyss));
+  color: var(--hp-brass-hi);
+}
+
+/* 6. HOGWARTS PARCHMENT & BRASS FILIGREE MODALS + TOAST */
+
+:is(body[data-forced-game='gardenscapes'], body[data-active-game='gardenscapes'])
+  dialog.playrix-modal {
+  background:
+    radial-gradient(circle at 50% 15%, rgba(255, 253, 245, 0.78), transparent 70%),
+    linear-gradient(180deg, var(--hp-parchment-top) 0%, var(--hp-parchment-mid) 65%, var(--hp-parchment-btm) 100%);
+  color: var(--hp-ink-dark);
+  border: 3.5px solid var(--hp-brass-mid);
+  border-radius: 18px;
+  box-shadow:
+    0 0 0 3px var(--hp-emerald-lo),
+    0 24px 58px rgba(0, 0, 0, 0.72),
+    inset 0 0 0 2px rgba(140, 98, 20, 0.22);
+}
+
+:is(body[data-forced-game='gardenscapes'], body[data-active-game='gardenscapes'])
+  dialog.playrix-modal
+  .modal-header {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(63, 201, 134, 0.32), transparent 68%),
+    linear-gradient(180deg, #1b6944 0%, #0b3621 100%);
+  border-bottom: 3px solid var(--hp-brass-mid);
+  color: var(--hp-brass-hi);
+}
+
+:is(body[data-forced-game='gardenscapes'], body[data-active-game='gardenscapes'])
+  dialog.playrix-modal
+  .modal-header.hard {
+  background: linear-gradient(180deg, #2d4673 0%, #14223d 100%);
+  border-bottom-color: var(--hp-brass-mid);
+}
+
+:is(body[data-forced-game='gardenscapes'], body[data-active-game='gardenscapes'])
+  dialog.playrix-modal
+  .modal-header.super_hard {
+  background: linear-gradient(180deg, #9e1f24 0%, #4f090d 100%);
+  border-bottom-color: var(--hp-brass-mid);
+}
+
+:is(body[data-forced-game='gardenscapes'], body[data-active-game='gardenscapes'])
+  dialog.playrix-modal
+  .modal-header
+  h2 {
+  font-family: var(--hp-font-serif);
+  letter-spacing: 0.03em;
+  color: var(--hp-brass-hi);
+}
+
+:is(body[data-forced-game='gardenscapes'], body[data-active-game='gardenscapes'])
+  dialog.playrix-modal
+  .modal-close-btn {
+  background: radial-gradient(circle at 35% 30%, #ef474b, #871217);
+  border: 2px solid var(--hp-brass-hi);
+  color: #fff6dc;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+}
+
+:is(body[data-forced-game='gardenscapes'], body[data-active-game='gardenscapes'])
+  :is(.task-card, .social-post-card, .pre-booster-card, .modal-parchment-box) {
+  background: linear-gradient(180deg, #fffdf7 0%, var(--hp-parchment-card) 100%);
+  border: 2px solid #c69f47;
+  border-radius: 13px;
+  color: var(--hp-ink-dark);
+}
+
+:is(body[data-forced-game='gardenscapes'], body[data-active-game='gardenscapes']) .dialogue-scroll-box {
+  background: linear-gradient(180deg, #f9eed2 0%, #edd9ac 100%);
+  border: 1.5px solid #c69f47;
+  color: var(--hp-ink-dark);
+}
+
+:is(body[data-forced-game='gardenscapes'], body[data-active-game='gardenscapes'])
+  .task-card.completed,
+:is(body[data-forced-game='gardenscapes'], body[data-active-game='gardenscapes'])
+  .pre-booster-card.selected {
+  background: linear-gradient(180deg, #e6f7ed 0%, #c8ead6 100%);
+  border-color: var(--hp-emerald-mid);
+}
+
+:is(body[data-forced-game='gardenscapes'], body[data-active-game='gardenscapes'])
+  .tablet-tabs {
+  background: #dec692;
+  border: 1.5px solid #ad8428;
+  border-radius: 12px;
+}
+
+:is(body[data-forced-game='gardenscapes'], body[data-active-game='gardenscapes'])
+  .tablet-tab-btn {
+  color: var(--hp-ink-dark);
+}
+
+:is(body[data-forced-game='gardenscapes'], body[data-active-game='gardenscapes'])
+  .tablet-tab-btn.active {
+  background: linear-gradient(180deg, var(--hp-emerald-hi), var(--hp-emerald-lo));
+  color: var(--hp-brass-hi);
+  border: 1px solid var(--hp-brass-mid);
+}
+
+:is(body[data-forced-game='gardenscapes'], body[data-active-game='gardenscapes'])
+  #scapes-toast {
+  background: linear-gradient(180deg, #154d32, #092618) !important;
+  color: var(--hp-brass-hi) !important;
+  border: 2px solid var(--hp-brass-mid) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
+}
+

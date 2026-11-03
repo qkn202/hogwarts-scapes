@@ -1,0 +1,314 @@
+/**
+ * Playrix Tactile Glossy Design System — Shared HUD, World & Match-3 Layout
+ * Supports Homescapes (Warm Gold / Royal Purple Mansion theme)
+ * and Gardenscapes (Lush Emerald / Sunny Sky Garden theme).
+ */
+
+:root {
+  --font-display: 'Fredoka', 'Nunito', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+  --gold-top: #ffe066;
+  --gold-btm: #d98200;
+  --green-top: #52b788;
+  --green-btm: #1b4332;
+  --pink-top: #e63946;
+  --pink-btm: #8d0801;
+  --panel-cream: #fdf6e3;
+  --panel-border: #d49b35;
+  --text-dark: #2c1a10;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100dvh;
+  font-family: var(--font-display);
+  background: #191224;
+  color: #ffffff;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Main Game Shell */
+.scapes-shell {
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.scapes-shell[data-game='homescapes'] {
+  --accent-top: #c77dff;
+  --accent-btm: #7b2cbf;
+}
+
+.scapes-shell[data-game='gardenscapes'] {
+  --accent-top: #52b788;
+  --accent-btm: #1b4332;
+}
+
+/* Floating Playrix Corner HUD (Full-Bleed in World, Auto-Hidden in Match-3!) */
+.top-hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
+  pointer-events: none;
+  flex-wrap: wrap;
+}
+
+.scapes-shell[data-screen='match3'] .top-hud {
+  display: none !important;
+}
+
+.hud-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  pointer-events: auto;
+}
+
+.hud-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(28, 20, 38, 0.86);
+  border: 2px solid #ffd166;
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+
+.hud-pill .pill-sub {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ffe8a3;
+}
+
+/* Playrix Glossy 3D Buttons */
+.btn-playrix {
+  appearance: none;
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  border-radius: 16px;
+  padding: 9px 18px;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 0.96rem;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+  background: linear-gradient(180deg, var(--green-top), var(--green-btm));
+  box-shadow: 0 4px 0 #1b4332, 0 6px 14px rgba(0, 0, 0, 0.35);
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+.btn-playrix:hover {
+  filter: brightness(1.07);
+}
+
+.btn-playrix:active {
+  transform: translateY(2px);
+}
+
+.btn-gold {
+  background: linear-gradient(180deg, var(--gold-top), var(--gold-btm));
+  color: #3d2200;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 0 #9c5700, 0 6px 14px rgba(0, 0, 0, 0.35);
+}
+
+.btn-purple {
+  background: linear-gradient(180deg, #9d4edd, #480ca8);
+  box-shadow: 0 4px 0 #240046, 0 6px 14px rgba(0, 0, 0, 0.35);
+}
+
+.btn-red {
+  background: linear-gradient(180deg, var(--pink-top), var(--pink-btm));
+  box-shadow: 0 4px 0 #780000, 0 6px 14px rgba(0, 0, 0, 0.35);
+}
+
+/* World Stage (2.5D Mansion or Garden) */
+.world-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.world-canvas-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+.world-canvas-wrap canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* Area Navigation Pill Top-Center */
+.area-banner {
+  position: absolute;
+  top: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 249, 236, 0.96);
+  color: var(--text-dark);
+  border: 2.5px solid var(--panel-border);
+  border-radius: 999px;
+  padding: 5px 14px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.34);
+  white-space: nowrap;
+}
+
+.area-banner button {
+  background: #ffd166;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.area-banner button[aria-disabled='true'] {
+  opacity: 0.38;
+  cursor: not-allowed;
+  filter: grayscale(0.35);
+}
+
+/* Bottom World Dock (Tablet Button + Big Play Level Button + Mini-Game / Wheel) */
+.world-dock {
+  position: absolute;
+  bottom: 14px;
+  left: 16px;
+  right: 16px;
+  z-index: 14;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  pointer-events: none;
+  gap: 12px;
+}
+
+.world-dock > * {
+  pointer-events: auto;
+}
+
+.dock-left {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.play-level-cta {
+  padding: 13px 26px;
+  font-size: 1.12rem;
+  border-radius: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.2;
+}
+
+.play-level-cta small {
+  font-size: 0.74rem;
+  opacity: 0.92;
+}
+
+/* 3-Style Furniture / Landscape Picker Overlay Bar (Signature Playrix!) */
+.style-picker-bar {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  background: rgba(255, 249, 236, 0.98);
+  color: var(--text-dark);
+  border: 3px solid #ffb703;
+  border-radius: 24px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  max-width: 95vw;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.style-option-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  border: 2.5px solid #dee2e6;
+  background: #ffffff;
+  cursor: pointer;
+  min-width: 106px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.style-option-btn.active {
+  border-color: #2b8a3e;
+  background: #ebfbee;
+  transform: translateY(-3px);
+}
+
+.style-swatch {
+  width: 44px;
+  height: 26px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(0, 0, 0, 0.2);
+}
+
+.notif-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  margin-left: 5px;
+  border-radius: 999px;
+  background: #e63946;
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 900;
+  border: 2px solid #ffffff;
+}
+

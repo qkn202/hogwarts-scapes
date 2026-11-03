@@ -1,0 +1,189 @@
+/* Expanded Panoramic 2.5D Map HUD & 2D Panning Hogwarts Estate Atlas (`2d-panning`) */
+
+.world-zoom-pill {
+  position: absolute;
+  left: 12px;
+  top: 126px;
+  z-index: 16;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 5px;
+  border-radius: 999px;
+  background: rgba(20, 12, 18, 0.82);
+  border: 1.8px solid rgba(255, 234, 156, 0.82);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(6px);
+}
+
+.scapes-shell[data-game='gardenscapes'] .world-zoom-pill {
+  background: rgba(9, 30, 20, 0.84);
+}
+
+.world-zoom-btn {
+  appearance: none;
+  border: none;
+  background: rgba(255, 234, 156, 0.14);
+  color: #ffea9c;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 0.76rem;
+  line-height: 1;
+  padding: 6px 9px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.12s ease;
+}
+
+.world-zoom-btn:hover {
+  background: rgba(255, 234, 156, 0.28);
+}
+
+.world-zoom-btn:active {
+  transform: scale(0.95);
+}
+
+.world-zoom-btn.is-overview {
+  background: linear-gradient(135deg, #f59f00, #d97706);
+  color: #1f1308;
+}
+
+#world-canvas:focus-visible {
+  outline: 3px solid #ffd166;
+  outline-offset: -3px;
+}
+
+/* 2D Panning Hogwarts Estate Atlas inside Tablet Modal */
+.hogwarts-atlas-hint {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #4a3423;
+}
+
+.hogwarts-atlas-viewport {
+  inline-size: 100%;
+  block-size: 320px;
+  overflow: auto;
+  scroll-axis-lock: none;
+  overscroll-behavior: none;
+  border-radius: 14px;
+  border: 2.5px solid #c99b2e;
+  box-shadow: inset 0 0 28px rgba(0, 0, 0, 0.45);
+  background: #1d140c;
+  cursor: grab;
+}
+
+.hogwarts-atlas-viewport.is-dragging {
+  cursor: grabbing;
+}
+
+.hogwarts-atlas-viewport:focus-visible {
+  outline: 3px solid #d97706;
+  outline-offset: 2px;
+}
+
+@supports not (scroll-axis-lock: none) {
+  .hogwarts-atlas-viewport {
+    touch-action: none;
+  }
+}
+
+.hogwarts-atlas-surface {
+  position: relative;
+  inline-size: 1080px;
+  block-size: 620px;
+  background:
+    radial-gradient(circle at 22% 28%, rgba(255, 214, 102, 0.18), transparent 45%),
+    radial-gradient(circle at 78% 68%, rgba(76, 201, 240, 0.14), transparent 48%),
+    linear-gradient(135deg, #2b1d12 0%, #3d2817 48%, #1f2e22 100%);
+  user-select: none;
+}
+
+.hogwarts-atlas-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.atlas-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 176px;
+  padding: 6px;
+  border-radius: 12px;
+  border: 2px solid #e09f3e;
+  background: rgba(252, 244, 223, 0.96);
+  color: #231509;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.42);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.atlas-node:hover {
+  transform: translate(-50%, -52%) scale(1.03);
+  border-color: #ffd166;
+}
+
+.atlas-node.is-current {
+  border-color: #38b87c;
+  box-shadow: 0 0 0 3px rgba(56, 184, 124, 0.45), 0 10px 22px rgba(0, 0, 0, 0.5);
+}
+
+.atlas-node.is-locked {
+  opacity: 0.68;
+  filter: grayscale(0.65);
+}
+
+.atlas-node-thumb {
+  width: 100%;
+  height: 54px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1.5px solid rgba(184, 134, 11, 0.55);
+  display: block;
+}
+
+.atlas-node-title {
+  font-weight: 900;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  margin-top: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.atlas-node-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 3px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #6b4423;
+}
+
+@media (max-width: 640px) {
+  .world-zoom-pill {
+    top: 106px;
+    left: 8px;
+    padding: 2px 4px;
+  }
+  .world-zoom-btn {
+    font-size: 0.7rem;
+    padding: 5px 7px;
+  }
+  .hogwarts-atlas-viewport {
+    block-size: 255px;
+  }
+}

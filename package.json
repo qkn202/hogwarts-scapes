@@ -1,0 +1,16 @@
+{
+  "name": "homescapes-gardenscapes-collection",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "description": "Harry Potter Wizarding Scapes — 77,777 Hardcore Match-3 Levels, 2.5D Hogwarts Castle & Grounds, and Online House Cup Multiplayer",
+  "scripts": {
+    "dev": "vite",
+    "server": "node --no-warnings server/hogwartsServer.mjs",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.2.0"
+  }
+}

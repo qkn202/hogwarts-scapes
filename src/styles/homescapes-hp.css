@@ -1,0 +1,482 @@
+/* Homescapes — Harry Potter Hogwarts Castle Bespoke UI Theme (Crimson, Brass & Marauder's Parchment) */
+
+:root {
+  --hc-crimson-hi: #c92a35;
+  --hc-crimson-mid: #7d151d;
+  --hc-crimson-lo: #450a10;
+  --hc-crimson-abyss: #210407;
+  --hc-sapphire-hi: #3c5482;
+  --hc-sapphire-lo: #121c33;
+}
+
+/* 1. SHELL & TOP HUD */
+
+.scapes-shell[data-game='homescapes'] {
+  --accent-top: var(--hc-crimson-hi);
+  --accent-btm: var(--hc-crimson-lo);
+  background: radial-gradient(circle at 50% 35%, #3d0f17 0%, #160508 100%);
+}
+
+.scapes-shell[data-game='homescapes'] .top-hud {
+  padding: 12px 18px;
+}
+
+.scapes-shell[data-game='homescapes'] .hud-pill {
+  position: relative;
+  background:
+    radial-gradient(ellipse at 20% 15%, rgba(255, 255, 255, 0.55), transparent 60%),
+    linear-gradient(180deg, var(--hp-parchment-top) 0%, var(--hp-parchment-mid) 58%, var(--hp-parchment-btm) 100%);
+  color: var(--hp-ink-dark);
+  border: 2.5px solid var(--hp-brass-mid);
+  border-radius: 12px;
+  padding: 6px 15px;
+  font-weight: 800;
+  box-shadow:
+    0 0 0 2px var(--hc-crimson-lo),
+    0 5px 14px rgba(0, 0, 0, 0.54),
+    inset 0 1px 0 #fffdf7,
+    inset 0 -2px 4px rgba(138, 96, 20, 0.28);
+}
+
+.scapes-shell[data-game='homescapes'] .hud-pill::before,
+.scapes-shell[data-game='homescapes'] .hud-pill::after {
+  content: '❖';
+  content: '❖' / '';
+  font-size: 0.62rem;
+  color: var(--hc-crimson-mid);
+  opacity: 0.85;
+}
+
+.scapes-shell[data-game='homescapes'] .world-canvas-wrap canvas {
+  cursor: default;
+}
+
+.scapes-shell[data-game='homescapes'] #hud-game-title {
+  font-family: var(--hp-font-serif);
+  letter-spacing: 0.04em;
+  background: linear-gradient(180deg, #8f1b24 0%, #4a0a10 100%);
+  color: var(--hp-brass-hi);
+  border: 2.5px solid var(--hp-brass-mid);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.72);
+  padding: 6px 16px;
+}
+
+.scapes-shell[data-game='homescapes'] #hud-game-title::before,
+.scapes-shell[data-game='homescapes'] #hud-game-title::after {
+  color: var(--hp-brass-hi);
+}
+
+/* 2. HOGWARTS ROYAL CRIMSON & BRASS TACTILE BUTTONS */
+
+:is(.scapes-shell[data-game='homescapes'], body[data-forced-game='homescapes'], body[data-active-game='homescapes']) .btn-playrix {
+  border-radius: 12px;
+  border: 2px solid var(--hp-brass-hi);
+  background: linear-gradient(180deg, var(--hc-crimson-hi) 0%, var(--hc-crimson-mid) 52%, var(--hc-crimson-lo) 100%);
+  color: #fff9e6;
+  letter-spacing: 0.015em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.72);
+  box-shadow:
+    0 3px 0 var(--hp-brass-rim),
+    0 0 0 1.5px var(--hp-brass-lo),
+    0 7px 16px rgba(0, 0, 0, 0.48),
+    inset 0 1px 1px rgba(255, 250, 220, 0.52);
+}
+
+:is(.scapes-shell[data-game='homescapes'], body[data-forced-game='homescapes'], body[data-active-game='homescapes']) .btn-playrix.btn-gold {
+  background: linear-gradient(180deg, #ffedb0 0%, #e0a832 52%, #9e690b 100%);
+  border-color: #fff6d1;
+  color: var(--hp-ink-dark);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 3px 0 #593904,
+    0 0 0 1.5px #382302,
+    0 7px 16px rgba(0, 0, 0, 0.45),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+:is(.scapes-shell[data-game='homescapes'], body[data-forced-game='homescapes'], body[data-active-game='homescapes']) .btn-playrix.btn-purple {
+  background: linear-gradient(180deg, var(--hc-sapphire-hi) 0%, #1d2d52 55%, var(--hc-sapphire-lo) 100%);
+  border-color: var(--hp-brass-mid);
+  color: #fcefb4;
+  box-shadow:
+    0 3px 0 #090f1f,
+    0 0 0 1.5px var(--hp-brass-lo),
+    0 7px 16px rgba(0, 0, 0, 0.48),
+    inset 0 1px 1px rgba(255, 236, 179, 0.35);
+}
+
+:is(.scapes-shell[data-game='homescapes'], body[data-forced-game='homescapes'], body[data-active-game='homescapes']) .btn-playrix.btn-red {
+  background: linear-gradient(180deg, #ef4444 0%, #991b1b 55%, #5c0b0e 100%);
+  border-color: var(--hp-brass-hi);
+  color: #fff8e7;
+  box-shadow:
+    0 3px 0 #3b0507,
+    0 0 0 1.5px var(--hp-brass-lo),
+    0 7px 16px rgba(0, 0, 0, 0.48);
+}
+
+/* 3. MARAUDER'S MAP PARCHMENT SCROLL, SIDE RAIL & SPELL CTA */
+
+.scapes-shell[data-game='homescapes'] .area-banner {
+  top: 60px;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255, 253, 244, 0.7), transparent 70%),
+    linear-gradient(180deg, #fcf4df 0%, #ecd9ae 55%, #d6bc84 100%);
+  color: var(--hp-ink-dark);
+  border: 2.5px solid var(--hp-brass-lo);
+  border-radius: 10px;
+  padding: 7px 20px;
+  box-shadow:
+    0 0 0 2px var(--hc-crimson-lo),
+    0 10px 24px rgba(0, 0, 0, 0.54),
+    inset 0 1px 0 #fffef9;
+}
+
+.scapes-shell[data-game='homescapes'] .area-banner::before,
+.scapes-shell[data-game='homescapes'] .area-banner::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  width: 11px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #7c5410, #ffd978 48%, #6e490b);
+  border: 1.5px solid #3d2704;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45);
+}
+
+.scapes-shell[data-game='homescapes'] .area-banner::before {
+  left: -8px;
+}
+
+.scapes-shell[data-game='homescapes'] .area-banner::after {
+  right: -8px;
+}
+
+.scapes-shell[data-game='homescapes'] .area-banner strong {
+  font-family: var(--hp-font-serif);
+  font-size: 0.98rem;
+  letter-spacing: 0.02em;
+  color: var(--hp-ink-dark);
+}
+
+.scapes-shell[data-game='homescapes'] .area-banner button {
+  background: linear-gradient(180deg, var(--hc-crimson-hi), var(--hc-crimson-lo));
+  color: var(--hp-brass-hi);
+  border: 1.5px solid var(--hp-brass-mid);
+  width: 30px;
+  height: 30px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+}
+
+.scapes-shell[data-game='homescapes'] .world-rail-btn {
+  background: linear-gradient(180deg, rgba(138, 26, 36, 0.95), rgba(59, 10, 16, 0.97));
+  border-color: var(--hp-brass-hi);
+}
+
+.scapes-shell[data-game='homescapes'] .visitor-banner {
+  background: linear-gradient(135deg, rgba(94, 16, 24, 0.96), rgba(38, 6, 10, 0.98));
+  border-color: var(--hp-brass-hi);
+}
+
+.scapes-shell[data-game='homescapes'] .play-level-cta {
+  position: relative;
+  padding: 13px 30px;
+  border-radius: 14px;
+  border: 2.5px solid var(--hp-brass-hi);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 168, 168, 0.32), transparent 62%),
+    linear-gradient(180deg, #b8222d 0%, #75121a 58%, #3d070c 100%);
+  box-shadow:
+    0 4px 0 var(--hp-brass-rim),
+    0 0 0 2.5px var(--hp-brass-mid),
+    0 12px 28px rgba(0, 0, 0, 0.62),
+    inset 0 1px 2px rgba(255, 245, 200, 0.7);
+}
+
+.scapes-shell[data-game='homescapes'] .play-level-cta #btn-play-level-num {
+  font-family: var(--hp-font-serif);
+  font-size: 1.22rem;
+  color: var(--hp-brass-hi);
+  letter-spacing: 0.05em;
+}
+
+/* 4. 3-STYLE RENOVATION BAR & DOCK VISIBILITY */
+
+.scapes-shell[data-game='homescapes'] .style-picker-bar {
+  bottom: 12px;
+  padding: 9px 14px;
+  background:
+    radial-gradient(circle at 50% 10%, rgba(255, 253, 245, 0.78), transparent 70%),
+    linear-gradient(180deg, #fbf2dc 0%, #ead6ab 100%);
+  color: var(--hp-ink-dark);
+  border: 3px solid var(--hp-brass-mid);
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 3px var(--hc-crimson-lo),
+    0 16px 40px rgba(0, 0, 0, 0.65);
+}
+
+.scapes-shell[data-game='homescapes'] .world-stage {
+  --dock-opacity: 1;
+  --dock-events: auto;
+}
+.scapes-shell[data-game='homescapes'] .world-stage:has(#style-picker-bar:not(.hidden)) {
+  --dock-opacity: 0;
+  --dock-events: none;
+}
+.scapes-shell[data-game='homescapes'] .world-dock {
+  opacity: var(--dock-opacity);
+  pointer-events: var(--dock-events);
+}
+
+.scapes-shell[data-game='homescapes'] .style-option-btn {
+  background: #fffaf0;
+  border: 2px solid #c9ab6d;
+  border-radius: 12px;
+  color: var(--hp-ink-dark);
+}
+
+.scapes-shell[data-game='homescapes'] .style-option-btn.active {
+  background: linear-gradient(180deg, #fff0eb 0%, #f9d8cf 100%);
+  border-color: var(--hc-crimson-mid);
+  box-shadow: 0 0 0 2px var(--hp-brass-mid), 0 6px 14px rgba(92, 14, 22, 0.28);
+}
+
+/* 5. MATCH-3 STAGE — CASTLE GRIMOIRE & TIME-TURNER DIAL */
+
+.scapes-shell[data-game='homescapes'] .match3-stage {
+  background-image:
+    radial-gradient(circle at 50% 50%, rgba(62, 14, 22, 0.5), rgba(20, 4, 8, 0.85)),
+    var(--m3-bg-url, none);
+}
+
+.scapes-shell[data-game='homescapes'] .m3-left-panel {
+  position: relative;
+  background:
+    radial-gradient(circle at 50% 12%, rgba(255, 253, 246, 0.72), transparent 68%),
+    linear-gradient(180deg, var(--hp-parchment-top) 0%, var(--hp-parchment-mid) 56%, var(--hp-parchment-btm) 100%);
+  color: var(--hp-ink-dark);
+  border: 3px solid var(--hp-brass-mid);
+  border-radius: 16px;
+  padding: 15px 14px;
+  box-shadow:
+    0 0 0 3px var(--hc-crimson-lo),
+    0 14px 34px rgba(0, 0, 0, 0.64),
+    inset 0 0 0 2px rgba(138, 96, 20, 0.3);
+}
+
+.scapes-shell[data-game='homescapes'] .austin-m3-card {
+  background: linear-gradient(135deg, #6e141d 0%, #33070c 100%);
+  border: 2px solid var(--hp-brass-mid);
+  border-radius: 12px;
+  color: var(--hp-brass-hi);
+  padding: 7px 10px;
+  box-shadow: inset 0 1px 0 rgba(255, 238, 173, 0.35);
+}
+
+.scapes-shell[data-game='homescapes'] .austin-m3-card img {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #a82431, #38070d);
+  border: 2px solid var(--hp-brass-hi);
+  padding: 2px;
+}
+
+.scapes-shell[data-game='homescapes'] #m3-austin-mood {
+  color: #fce2d4 !important;
+}
+
+.scapes-shell[data-game='homescapes'] .moves-box {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(224, 83, 96, 0.28), transparent 65%),
+    linear-gradient(180deg, #69131b 0%, #2b060a 100%);
+  border: 2.5px solid var(--hp-brass-mid);
+  border-radius: 14px;
+  box-shadow:
+    inset 0 0 12px rgba(0, 0, 0, 0.45),
+    0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+.scapes-shell[data-game='homescapes'] .moves-box .moves-num {
+  font-family: var(--hp-font-serif);
+  color: var(--hp-brass-hi);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.65);
+}
+
+.scapes-shell[data-game='homescapes'] .goal-chip {
+  background: linear-gradient(180deg, #fffdf7 0%, #f2e4c2 100%);
+  border: 2px solid #b88b28;
+  border-radius: 11px;
+  color: var(--hp-ink-dark);
+  box-shadow: 0 2px 5px rgba(45, 28, 10, 0.16);
+}
+
+.scapes-shell[data-game='homescapes'] .goal-chip.done {
+  background: linear-gradient(180deg, #fff3cc 0%, #f5da8e 100%);
+  border-color: var(--hc-crimson-mid);
+  color: var(--hc-crimson-lo);
+}
+
+.scapes-shell[data-game='homescapes'] .rainbow-meter-card {
+  background: linear-gradient(180deg, #541018 0%, #240509 100%);
+  border: 2px solid var(--hp-brass-mid);
+  border-radius: 13px;
+  box-shadow: inset 0 1px 0 rgba(255, 236, 179, 0.25);
+}
+
+.scapes-shell[data-game='homescapes'] .rainbow-dial-ring {
+  background: conic-gradient(
+    #ffea9c,
+    #f77f00,
+    #e63946,
+    #9b5de5,
+    #ffd166 var(--charge-deg, 0deg),
+    rgba(255, 255, 255, 0.14) 0deg
+  );
+  box-shadow: 0 0 10px rgba(255, 209, 102, 0.4);
+}
+
+.scapes-shell[data-game='homescapes'] .rainbow-bar-fill {
+  background: linear-gradient(90deg, #c92a35, #f77f00, #ffd166, #fff3b0);
+}
+
+.scapes-shell[data-game='homescapes'] .booster-btn {
+  width: 84px;
+  border-radius: 14px;
+  border: 2px solid var(--hp-brass-mid);
+  background:
+    radial-gradient(circle at 50% 20%, rgba(201, 42, 53, 0.26), transparent 70%),
+    linear-gradient(180deg, #591119 0%, #26060a 100%);
+  color: #fef6df;
+  box-shadow:
+    0 0 0 1.5px var(--hp-brass-rim),
+    0 6px 14px rgba(0, 0, 0, 0.5);
+}
+
+.scapes-shell[data-game='homescapes'] .booster-btn.armed {
+  background: linear-gradient(180deg, #ffea9c 0%, #d49b24 100%);
+  color: var(--hp-ink-dark);
+  border-color: #ffffff;
+}
+
+.scapes-shell[data-game='homescapes'] .m3-pause-btn {
+  border: 2px solid var(--hp-brass-hi);
+  background: linear-gradient(180deg, var(--hc-crimson-mid), var(--hc-crimson-abyss));
+  color: var(--hp-brass-hi);
+}
+
+/* 6. MODALS, APP TOUR & COMPACT MOBILE PARITY */
+
+:is(body[data-forced-game='homescapes'], body[data-active-game='homescapes']) dialog.playrix-modal {
+  background:
+    radial-gradient(circle at 50% 15%, rgba(255, 253, 245, 0.78), transparent 70%),
+    linear-gradient(180deg, var(--hp-parchment-top) 0%, var(--hp-parchment-mid) 65%, var(--hp-parchment-btm) 100%);
+  color: var(--hp-ink-dark);
+  border: 3.5px solid var(--hp-brass-mid);
+  border-radius: 18px;
+  box-shadow:
+    0 0 0 3px var(--hc-crimson-lo),
+    0 24px 58px rgba(0, 0, 0, 0.72),
+    inset 0 0 0 2px rgba(140, 98, 20, 0.22);
+}
+
+:is(body[data-forced-game='homescapes'], body[data-active-game='homescapes']) dialog.playrix-modal .modal-header {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(235, 94, 104, 0.3), transparent 68%),
+    linear-gradient(180deg, #8c1a24 0%, #450910 100%);
+  border-bottom: 3px solid var(--hp-brass-mid);
+  color: var(--hp-brass-hi);
+}
+
+:is(body[data-forced-game='homescapes'], body[data-active-game='homescapes']) dialog.playrix-modal .modal-header.hard {
+  background: linear-gradient(180deg, #2d4673 0%, #14223d 100%);
+  border-bottom-color: var(--hp-brass-mid);
+}
+
+:is(body[data-forced-game='homescapes'], body[data-active-game='homescapes']) dialog.playrix-modal .modal-header.super_hard {
+  background: linear-gradient(180deg, #a61c24 0%, #450509 100%);
+  border-bottom-color: var(--hp-brass-mid);
+}
+
+:is(body[data-forced-game='homescapes'], body[data-active-game='homescapes']) dialog.playrix-modal .modal-header h2 {
+  font-family: var(--hp-font-serif);
+  letter-spacing: 0.03em;
+  color: var(--hp-brass-hi);
+}
+
+:is(body[data-forced-game='homescapes'], body[data-active-game='homescapes']) dialog.playrix-modal .modal-close-btn {
+  background: radial-gradient(circle at 35% 30%, #ef474b, #871217);
+  border: 2px solid var(--hp-brass-hi);
+  color: #fff6dc;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+}
+
+:is(body[data-forced-game='homescapes'], body[data-active-game='homescapes'])
+  :is(.task-card, .social-post-card, .pre-booster-card, .modal-parchment-box) {
+  background: linear-gradient(180deg, #fffdf7 0%, var(--hp-parchment-card) 100%);
+  border: 2px solid #c69f47;
+  border-radius: 13px;
+  color: var(--hp-ink-dark);
+}
+
+:is(body[data-forced-game='homescapes'], body[data-active-game='homescapes']) .dialogue-scroll-box {
+  background: linear-gradient(180deg, #f9eed2 0%, #edd9ac 100%);
+  border: 1.5px solid #c69f47;
+  color: var(--hp-ink-dark);
+}
+
+:is(body[data-forced-game='homescapes'], body[data-active-game='homescapes']) .task-card.completed,
+:is(body[data-forced-game='homescapes'], body[data-active-game='homescapes']) .pre-booster-card.selected,
+:is(body[data-forced-game='homescapes'], body[data-active-game='homescapes']) .house-radio-pill:has(input:checked),
+:is(body[data-forced-game='homescapes'], body[data-active-game='homescapes']) .house-radio-pill.checked {
+  background: linear-gradient(180deg, #fff4eb 0%, #f7dfd0 100%);
+  border-color: var(--hc-crimson-mid);
+  color: var(--hc-crimson-lo);
+}
+
+:is(body[data-forced-game='homescapes'], body[data-active-game='homescapes']) .tablet-tabs {
+  background: #dec692;
+  border: 1.5px solid #ad8428;
+  border-radius: 12px;
+}
+
+:is(body[data-forced-game='homescapes'], body[data-active-game='homescapes']) .tablet-tab-btn {
+  color: var(--hp-ink-dark);
+}
+
+:is(body[data-forced-game='homescapes'], body[data-active-game='homescapes']) .tablet-tab-btn.active {
+  background: linear-gradient(180deg, var(--hc-crimson-hi), var(--hc-crimson-lo));
+  color: var(--hp-brass-hi);
+  border: 1px solid var(--hp-brass-mid);
+}
+
+:is(body[data-forced-game='homescapes'], body[data-active-game='homescapes']) #scapes-toast {
+  background: linear-gradient(180deg, #75131c, #36070c) !important;
+  color: var(--hp-brass-hi) !important;
+  border: 2px solid var(--hp-brass-mid) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
+}
+
+:is(body[data-forced-game='homescapes'], body[data-active-game='homescapes']) .hogwarts-tour {
+  background: linear-gradient(145deg, #5c1018, #290509);
+  border-color: var(--hp-brass-hi);
+}
+
+@media (max-width: 780px) and (orientation: portrait), (orientation: landscape) and (max-height: 540px) {
+  .scapes-shell[data-game='homescapes'] .hud-pill::before,
+  .scapes-shell[data-game='homescapes'] .hud-pill::after {
+    display: none;
+  }
+  .scapes-shell[data-game='homescapes'] .play-level-cta #btn-play-level-num {
+    font-size: 0.96rem;
+  }
+}
+
+@media (max-width: 359px) and (orientation: portrait) {
+  .scapes-shell[data-game='homescapes'] .play-level-cta #btn-play-level-num {
+    font-size: 0.86rem;
+  }
+}
+
