@@ -17,7 +17,7 @@ import { GardenscapesWorldRenderer } from '../world/gardenscapesRenderer.js';
 import { HomescapesWorldRenderer } from '../world/homescapesRenderer.js';
 import { PinMinigameController } from '../world/pinMinigame.js';
 import { openEventsModal } from './eventsModal.js';
-import { initFarmSystem, stopFarmIfActive, syncFarmHudBadge } from './farmController.js';
+import { initFarmSystem, shouldAutoEnterBurrowFarm, stopFarmIfActive, syncFarmHudBadge, toggleFarmMode } from './farmController.js';
 import {
   handleMatch3OutOfMoves,
   handleMatch3Victory,
@@ -218,6 +218,12 @@ export class ScapesApp {
     } else {
       this.visitorWorld = null;
       this.save.currentArea = Math.min(this.save.currentArea, this.getMaxUnlockedArea());
+      if (shouldAutoEnterBurrowFarm(this)) {
+        syncVisitorBanner(this);
+        toggleFarmMode(this, true, { fromAreaNav: true });
+        this.persistAndSyncHud();
+        return;
+      }
       const defaultLine = isHome
         ? 'Lâu Đài Hogwarts 12 chương (108 chỗ trang trí) đang chờ bạn! Chương 1 biến hóa theo Nhà của bạn!'
         : 'Khuôn viên Hogwarts 12 khu (108 chỗ trang trí) đang chờ bạn! Kéo map hoặc chạm cổ vật để yểm bùa!';

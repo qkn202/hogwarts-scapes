@@ -100,7 +100,7 @@ export function bindVisitorControls(app) {
   });
 
   document.getElementById('btn-area-prev')?.addEventListener('click', () => {
-    if (app.inFarmMode) {
+    if (app.inFarmMode && !app.farmFromAreaNav) {
       sound.sfxClick();
       app.enterWorldView();
       return;
@@ -121,7 +121,7 @@ export function bindVisitorControls(app) {
   });
 
   document.getElementById('btn-area-next')?.addEventListener('click', () => {
-    if (app.inFarmMode) {
+    if (app.inFarmMode && !app.farmFromAreaNav) {
       sound.sfxClick();
       app.enterWorldView();
       return;

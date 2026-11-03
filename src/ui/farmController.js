@@ -1,14 +1,21 @@
 /**
  * Wizarding Farmscapes Controller (`farmController.js`)
- * Connects `FarmHomesteadRenderer`, Floating Seed & Tool Belt (`#farm-tool-belt`),
- * HUD Toggle Button (`#btn-toggle-farm`), and Online Teammate Dewdrop Watering (`#btn-visitor-water`)
- * cleanly to `ScapesApp` while keeping `appShell.js` strictly modular and < 500 lines!
+ * Connects the 14×14 Isometric Tile-Grid `FarmHomesteadRenderer`, Dual-Mode Floating Belt
+ * (Play/Harvest Mode + Grid Architect Build Mode), HUD Toggle (`#btn-toggle-farm`),
+ * Area 7 (`Khu Vực 7: Trang Trại Hang Sóc`) seamless integration, and Friend Watering!
  */
 
 import { FARM_CROPS } from '../data/farmDefs.js';
 import {
+  FARM_BUILDINGS,
+  FARM_BUILDING_CATEGORIES,
+  getBuildingDef,
+} from '../data/farmGridDefs.js';
+import {
+  countBuildingType,
   countFarmReadyActions,
   getBarnTotalCount,
+  getEntityFootprint,
   loadFarmState,
   saveFarmState,
 } from '../utils/farmStorage.js';
@@ -18,9 +25,20 @@ import { FarmHomesteadRenderer } from '../world/farmHomesteadRenderer.js';
 import { spawnCelebrationFireworks } from '../world/gardenscapesExtras.js';
 import { applyRecipeRewardEffect, openFarmBarnModal } from './farmBarnModal.js';
 
+export function shouldAutoEnterBurrowFarm(app) {
+  if (app.gameId !== 'gardenscapes' || app.visitingGarden || app.save.currentArea !== 6) {
+    app.viewingBurrowStoryScene = false;
+    return false;
+  }
+  return !app.viewingBurrowStoryScene;
+}
+
 export function initFarmSystem(app) {
   app.farm = loadFarmState();
   app.inFarmMode = false;
+  app.farmFromAreaNav = false;
+  app.viewingBurrowStoryScene = false;
+  app.farmBuildCategory = 'fields';
 
   const worldCanvas = document.getElementById('world-canvas');
   app.farmRenderer = new FarmHomesteadRenderer(worldCanvas, {
@@ -30,7 +48,8 @@ export function initFarmSystem(app) {
       renderFarmToolBelt(app);
     },
     onToolChange: () => renderFarmToolBelt(app),
-    onOpenFarmModal: (tab) => openFarmBarnModal(app, tab),
+    onBuildStateChange: () => renderFarmToolBelt(app),
+    onOpenFarmModal: (tab, uid) => openFarmBarnModal(app, tab, uid),
     onCollectStationRecipe: (rec, x, y) => {
       const msg = applyRecipeRewardEffect(app, rec);
       sound.sfxVictory();
@@ -39,10 +58,26 @@ export function initFarmSystem(app) {
     },
   });
 
+  app.openFarmBuildCategory = (cat = 'workshops', placeType = null) => {
+    if (!app.inFarmMode) toggleFarmMode(app, true);
+    app.farmBuildCategory = cat;
+    app.farmRenderer.setBuildMode(true, placeType ? `place:${placeType}` : 'move');
+  };
+
   document.getElementById('btn-toggle-farm')?.addEventListener('click', () => {
     sound.sfxClick();
-    if (app.visitingGarden) {
-      app.exitVisitorGarden();
+    if (app.visitingGarden) app.exitVisitorGarden();
+    if (app.gameId === 'gardenscapes' && app.save.currentArea === 6) {
+      if (app.inFarmMode && app.farmFromAreaNav) {
+        app.viewingBurrowStoryScene = true;
+        app.enterWorldView(
+          '🌿 Đang xem Sân Cổ Vật Hang Sóc (9 ⭐) — Bấm "🌾 Trang Trại" để về Lưới Nông Trại 14×14!'
+        );
+      } else {
+        app.viewingBurrowStoryScene = false;
+        app.enterWorldView();
+      }
+      return;
     }
     toggleFarmMode(app);
   });
@@ -52,22 +87,23 @@ export function initFarmSystem(app) {
   });
 
   setInterval(() => {
-    if (app.screen === 'world') {
-      syncFarmHudBadge(app);
-    }
+    if (app.screen === 'world') syncFarmHudBadge(app);
   }, 1500);
 }
 
 export function stopFarmIfActive(app) {
   if (!app.farmRenderer) return;
   app.inFarmMode = false;
+  app.farmFromAreaNav = false;
   app.farmRenderer.stop();
   app.shellEl?.removeAttribute('data-farm-mode');
-  document.getElementById('farm-tool-belt')?.classList.add('hidden');
+  const belt = document.getElementById('farm-tool-belt');
+  belt?.classList.add('hidden');
+  belt?.classList.remove('is-build-mode');
   syncFarmToggleButtonLabel(app);
 }
 
-export function toggleFarmMode(app, forceEnable = null) {
+export function toggleFarmMode(app, forceEnable = null, opts = {}) {
   const target = forceEnable !== null ? Boolean(forceEnable) : !app.inFarmMode;
   if (!target) {
     stopFarmIfActive(app);
@@ -76,9 +112,9 @@ export function toggleFarmMode(app, forceEnable = null) {
     return;
   }
 
-  // Reload fresh shared farm state in case player switched between Homescapes & Gardenscapes
   app.farm = loadFarmState();
   app.inFarmMode = true;
+  app.farmFromAreaNav = Boolean(opts.fromAreaNav);
   app.pendingDesign = null;
   app.styleBarEl?.classList.add('hidden');
 
@@ -112,8 +148,9 @@ export function syncFarmToggleButtonLabel(app) {
   if (!btn) return;
   const badgeVal = countFarmReadyActions(app.farm);
   if (app.inFarmMode) {
-    const backIcon = app.gameId === 'homescapes' ? '🏰' : '🌿';
-    const backLbl = app.gameId === 'homescapes' ? 'Về Lâu Đài' : 'Về Vườn';
+    const isBurrowNav = app.farmFromAreaNav && app.gameId === 'gardenscapes' && app.save.currentArea === 6;
+    const backIcon = isBurrowNav ? '🌿' : app.gameId === 'homescapes' ? '🏰' : '🌿';
+    const backLbl = isBurrowNav ? 'Sân Cổ Vật' : app.gameId === 'homescapes' ? 'Về Lâu Đài' : 'Về Vườn';
     btn.classList.add('is-farm-active');
     btn.innerHTML = `${backIcon} <span class="dock-btn-label">${backLbl}</span>`;
   } else {
@@ -134,19 +171,131 @@ export function syncFarmHudBadge(app) {
     const areaNameEl = document.getElementById('hud-area-name');
     if (areaNameEl) {
       const totalBarn = getBarnTotalCount(app.farm);
-      areaNameEl.textContent = `🌾 Trang Trại Hang Sóc · Cấp ${app.farm.farmLevel} (Kho ${totalBarn}/${app.farm.barnCapacity} · 💧${app.farm.dewdrops || 0})`;
+      const prefix = app.farmFromAreaNav ? '🌾 Khu 7: Trang Trại Hang Sóc' : '🌾 Trang Trại Hang Sóc';
+      areaNameEl.textContent = `${prefix} · Lưới 14×14 Cấp ${app.farm.farmLevel} (Kho ${totalBarn}/${app.farm.barnCapacity} · 💧${app.farm.dewdrops || 0})`;
     }
-    const prevBtn = document.getElementById('btn-area-prev');
-    const nextBtn = document.getElementById('btn-area-next');
-    if (prevBtn) prevBtn.setAttribute('aria-disabled', 'true');
-    if (nextBtn) nextBtn.setAttribute('aria-disabled', 'true');
+    if (!app.farmFromAreaNav) {
+      document.getElementById('btn-area-prev')?.setAttribute('aria-disabled', 'true');
+      document.getElementById('btn-area-next')?.setAttribute('aria-disabled', 'true');
+    }
   }
 }
 
 export function renderFarmToolBelt(app) {
   const belt = document.getElementById('farm-tool-belt');
-  if (!belt || !app.farm) return;
-  const tool = app.farmRenderer?.selectedTool || 'harvest';
+  if (!belt || !app.farm || !app.farmRenderer) return;
+  const fr = app.farmRenderer;
+
+  if (fr.buildMode) {
+    belt.classList.add('is-build-mode');
+    const cat = app.farmBuildCategory || 'fields';
+    const pickedEnt = fr.movingUid ? app.farm.entities.find((e) => e.uid === fr.movingUid) : null;
+    const pickedDef = pickedEnt ? getBuildingDef(pickedEnt.type) : null;
+    const refund = pickedDef?.removable ? Math.floor((pickedDef.costCoins || 0) * 0.5) : 0;
+
+    const catBtns = FARM_BUILDING_CATEGORIES.map(
+      (c) => `<button type="button" class="farm-bcat-btn ${cat === c.id ? 'active' : ''}" data-build-cat="${c.id}">${c.label}</button>`
+    ).join('');
+
+    const cards = FARM_BUILDINGS.filter((b) => b.category === cat)
+      .map((b) => {
+        const built = countBuildingType(app.farm, b.type);
+        const cap = b.maxCount(app.farm.farmLevel);
+        const locked = app.farm.farmLevel < b.unlockFarmLv;
+        const isSel =
+          fr.buildAction === `place:${b.type}` || (pickedEnt && pickedEnt.type === b.type && b.costCoins === 0);
+        const fp = getEntityFootprint(b.type, fr.placeFlip);
+        const priceTag = locked
+          ? `🔒 Cấp ${b.unlockFarmLv}`
+          : b.costCoins === 0
+            ? '✥ Đổi chỗ'
+            : built >= cap
+              ? `Đầy ${built}/${cap}`
+              : `${b.costCoins}💰`;
+        return `
+          <button type="button" class="farm-build-card ${isSel ? 'active' : ''} ${locked ? 'locked' : ''}" data-place-building="${b.type}" title="${b.name}: ${b.desc}">
+            <span class="bcard-head">
+              <span class="bcard-ico">${b.icon}</span>
+              <span class="bcard-size">${fp.w}×${fp.h}</span>
+            </span>
+            <span class="bcard-name">${b.name.replace(/\s*\(.*\)/, '')}</span>
+            <small class="bcard-sub">${priceTag} · ${built}/${cap}</small>
+          </button>`;
+      })
+      .join('');
+
+    belt.innerHTML = `
+      <div class="farm-build-top-row">
+        <div class="farm-bcat-group">${catBtns}</div>
+        <div class="farm-bact-group">
+          <button type="button" class="farm-bact-btn ${fr.buildAction === 'move' ? 'active' : ''}" id="btn-build-move" title="Chạm công trình trên lưới để nhấc lên & đặt sang ô mới">✥ Di Chuyển</button>
+          <button type="button" class="farm-bact-btn ${fr.placeFlip || fr.movingFlip ? 'active' : ''}" id="btn-build-rotate" title="Xoay hướng công trình (VD: Xe Bay 2×1 ↔ 1×2)">🔄 Xoay</button>
+          <button type="button" class="farm-bact-btn ${fr.buildAction === 'erase' ? 'active is-danger' : ''}" id="btn-build-erase" title="Lướt hoặc chạm để dỡ đường đá, hàng rào, công trình (hoàn 50% Vàng)">🧹 Dỡ Ô</button>
+          ${
+            pickedEnt && pickedDef?.removable
+              ? `<button type="button" class="farm-bact-btn is-danger" id="btn-build-demolish">🗑️ Thu Hồi (+${refund}💰)</button>`
+              : ''
+          }
+          <button type="button" class="farm-bact-btn is-done" id="btn-exit-build-mode">✅ Xong</button>
+        </div>
+      </div>
+      <div class="farm-build-cards-row">${cards}</div>
+    `;
+
+    for (const cb of belt.querySelectorAll('[data-build-cat]')) {
+      cb.onclick = () => {
+        sound.sfxClick();
+        app.farmBuildCategory = cb.getAttribute('data-build-cat');
+        renderFarmToolBelt(app);
+      };
+    }
+    for (const pb of belt.querySelectorAll('[data-place-building]')) {
+      pb.onclick = () => {
+        const type = pb.getAttribute('data-place-building');
+        const def = getBuildingDef(type);
+        if (!def) return;
+        if (app.farm.farmLevel < def.unlockFarmLv) {
+          sound.sfxInvalid();
+          app.toast(`🔒 Cần đạt Cấp Nông Trại ${def.unlockFarmLv} để xây "${def.name}"!`);
+          return;
+        }
+        const built = countBuildingType(app.farm, type);
+        if (def.costCoins === 0 && built >= def.maxCount(app.farm.farmLevel)) {
+          const existing = app.farm.entities.find((e) => e.type === type);
+          if (existing) {
+            sound.sfxClick();
+            fr.buildAction = 'move';
+            fr.movingUid = existing.uid;
+            fr.movingFlip = Boolean(existing.flip);
+            app.toast(`✥ Đã chọn "${def.name}" — Chạm vào ô lưới trống bất kỳ để dời sang vị trí mới!`);
+            renderFarmToolBelt(app);
+          }
+          return;
+        }
+        sound.sfxClick();
+        fr.setBuildAction(`place:${type}`);
+      };
+    }
+    belt.querySelector('#btn-build-move')?.addEventListener('click', () => {
+      sound.sfxClick();
+      fr.setBuildAction('move');
+    });
+    belt.querySelector('#btn-build-rotate')?.addEventListener('click', () => fr.toggleRotateSelection());
+    belt.querySelector('#btn-build-erase')?.addEventListener('click', () => {
+      sound.sfxClick();
+      fr.setBuildAction('erase');
+    });
+    belt.querySelector('#btn-build-demolish')?.addEventListener('click', () => fr.demolishSelectedEntity());
+    belt.querySelector('#btn-exit-build-mode')?.addEventListener('click', () => {
+      sound.sfxClick();
+      fr.setBuildMode(false);
+    });
+    return;
+  }
+
+  // Play / Harvest Mode Belt
+  belt.classList.remove('is-build-mode');
+  const tool = fr.selectedTool || 'harvest';
   const readyOrders = countFarmReadyActions(app.farm);
 
   const cropBtns = FARM_CROPS.map((c) => {
@@ -169,6 +318,12 @@ export function renderFarmToolBelt(app) {
   }).join('');
 
   belt.innerHTML = `
+    <button type="button" class="farm-tool-chip is-build-cta" id="btn-enter-build-mode" title="Bật Lưới 14×14 để mua, đặt, dời & xoay công trình tự do!">
+      <span class="chip-ico">🔨</span>
+      <span class="chip-name">Xây &amp; Xếp Lưới</span>
+      <small class="chip-sub">14×14 Ô</small>
+    </button>
+    <div class="farm-tool-divider" aria-hidden="true"></div>
     <button type="button" class="farm-tool-chip ${tool === 'harvest' ? 'active' : ''}" data-farm-tool="harvest" title="Lướt qua luống chín để gặt hàng loạt">
       <span class="chip-ico">🧺</span>
       <span class="chip-name">Thu Hoạch</span>
@@ -182,12 +337,17 @@ export function renderFarmToolBelt(app) {
     <div class="farm-tool-divider" aria-hidden="true"></div>
     ${cropBtns}
     <div class="farm-tool-divider" aria-hidden="true"></div>
-    <button type="button" class="farm-tool-chip is-barn-cta" id="btn-belt-open-barn" title="Mở Đơn Hàng Cú, Bếp Bà Molly, Vạc Độc Dược & Kho Lẫm">
+    <button type="button" class="farm-tool-chip is-barn-cta" id="btn-belt-open-barn" title="Mở Đơn Hàng Cú, Xưởng Nướng Bánh, Cối Xay Bia Bơ & Kho Lẫm">
       <span class="chip-ico">🦉</span>
       <span class="chip-name">Đơn Cú &amp; Bếp</span>
       <small class="chip-sub">${readyOrders > 0 ? `✨ ${readyOrders} Xong` : 'Kho & Vạc'}</small>
     </button>
   `;
+
+  belt.querySelector('#btn-enter-build-mode')?.addEventListener('click', () => {
+    sound.sfxClick();
+    fr.setBuildMode(true, `place:soil_plot`);
+  });
 
   for (const b of belt.querySelectorAll('[data-farm-tool]')) {
     b.onclick = () => {
@@ -201,7 +361,7 @@ export function renderFarmToolBelt(app) {
         }
       }
       sound.sfxClick();
-      app.farmRenderer.setTool(nextTool);
+      fr.setTool(nextTool);
     };
   }
 
