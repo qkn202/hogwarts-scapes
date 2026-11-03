@@ -3,7 +3,7 @@ import { extname, join, resolve } from 'node:path';
 import { brotliCompressSync, constants as zlibConstants, gzipSync } from 'node:zlib';
 import { defineConfig } from 'vite';
 
-const COMPRESSIBLE_EXTS = new Set(['.html', '.js', '.css', '.json', '.webmanifest', '.svg']);
+const COMPRESSIBLE_EXTS = new Set(['.html', '.js', '.css', '.json', '.webmanifest', '.svg', '.glb']);
 const MIN_COMPRESS_BYTES = 512;
 
 function collectFilesRecursive(dir, acc = []) {
@@ -72,6 +72,7 @@ export default defineConfig({
   build: {
     target: 'esnext',
     cssCodeSplit: true,
+    chunkSizeWarningLimit: 700,
     rollupOptions: {
       input: {
         main: resolve(import.meta.dirname, 'index.html'),
@@ -80,16 +81,15 @@ export default defineConfig({
       },
       output: {
         manualChunks(id) {
+          if (id.includes('node_modules/three')) return 'three-vendor';
+          if (id.includes('/src/world3d/')) return 'world-3d';
           if (id.includes('/src/match3/')) return 'match3';
-          if (
-            id.includes('/src/data/homescapes') ||
-            id.includes('/src/data/houseCommonRooms') ||
-            id.includes('/src/world/homescapes')
-          ) {
-            return 'homescapes-world';
+          if (id.includes('/src/world/')) return 'world-2d';
+          if (id.includes('/src/data/homescapes') || id.includes('/src/data/houseCommonRooms')) {
+            return 'homescapes-data';
           }
-          if (id.includes('/src/data/gardenscapes') || id.includes('/src/world/gardenscapes')) {
-            return 'gardenscapes-world';
+          if (id.includes('/src/data/gardenscapes')) {
+            return 'gardenscapes-data';
           }
           return undefined;
         },

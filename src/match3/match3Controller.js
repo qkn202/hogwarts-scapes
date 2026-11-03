@@ -7,6 +7,7 @@
 import { haptics } from '../utils/haptics.js';
 import { sprites } from '../utils/spriteLoader.js';
 import { sound } from '../utils/sound.js';
+import { syncMatch3Stage3D } from '../world3d/match3Stage3d.js';
 import { Match3Board } from './boardCore.js';
 import { maybeTransitionToStage2, runVictoryFinaleSequence } from './finaleAndStage.js';
 import { Match3FxSystem } from './fxSystem.js';
@@ -422,15 +423,13 @@ export class Match3Controller {
         const ctx = this.ctx;
         ctx.clearRect(0, 0, this.viewW, this.viewH);
         if (!this.board) return;
-
+        syncMatch3Stage3D(this, timeSec);
         const ts = this.tileSize;
         const bw = this.board.cols * ts;
         const bh = this.board.rows * ts;
         const shake = this.fx.getShakeOffset();
-
         ctx.save();
         ctx.translate(shake.x, shake.y + (this.stageScrollOffsetY || 0));
-
         drawContouredBoardFrame(ctx, this.board, this.originX, this.originY, ts);
 
         for (let r = 0; r < this.board.rows; r++) {

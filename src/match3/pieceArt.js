@@ -3,6 +3,7 @@
  */
 
 import { sprites } from '../utils/spriteLoader.js';
+import { tryDrawMatch3Model3D } from '../world3d/match3Stage3d.js';
 import {
   drawColorblindBadge,
   drawEnchantedClam3D,
@@ -132,14 +133,7 @@ export function drawCellUnderlay(ctx, gameId, cell, x, y, size, timeSec = 0) {
   const rw = size - pad * 2;
 
   const isEven = (cell.r + cell.c) % 2 === 0;
-  ctx.fillStyle =
-    gameId === 'homescapes'
-      ? isEven
-        ? '#fbf3e0'
-        : '#eedec0'
-      : isEven
-        ? '#fbf2dc'
-        : '#ecdcB4';
+  ctx.fillStyle = gameId === 'homescapes' ? (isEven ? '#fbf3e0' : '#eedec0') : (isEven ? '#fbf2dc' : '#ecdcB4');
   roundRect(ctx, rx, ry, rw, rw, 8);
   ctx.fill();
 
@@ -337,15 +331,23 @@ export function drawCellContent(ctx, gameId, cell, cx, cy, size, timeSec = 0, co
       drawAlarmClock3D(ctx, gameId, cell.piece.color, cell.piece.fuse, size, timeSec);
       if (colorblind) drawColorblindBadge(ctx, cell.piece.color, size);
     } else {
-      const spKey = `${gameId === 'homescapes' ? 'h' : 'g'}_piece_${cell.piece.color}`;
-      const img = sprites.get(spKey);
-      if (img) {
-        const d = size * 0.86;
-        ctx.drawImage(img, -d / 2, -d / 2, d, d);
-      } else if (gameId === 'homescapes') {
-        drawHomescapesPiece(ctx, cell.piece.color, 0, 0, size * 0.38);
-      } else {
-        drawGardenscapesPiece(ctx, cell.piece.color, 0, 0, size * 0.38);
+      const m3Kind =
+        (gameId === 'gardenscapes' && cell.piece.color === 1) || (gameId === 'homescapes' && cell.piece.color === 3)
+          ? 'snitch'
+          : (gameId === 'gardenscapes' && cell.piece.color === 2) || (gameId === 'homescapes' && cell.piece.color === 1)
+            ? 'potion'
+            : null;
+      if (!m3Kind || !tryDrawMatch3Model3D(ctx, m3Kind, size * 0.96)) {
+        const spKey = `${gameId === 'homescapes' ? 'h' : 'g'}_piece_${cell.piece.color}`;
+        const img = sprites.get(spKey);
+        if (img) {
+          const d = size * 0.86;
+          ctx.drawImage(img, -d / 2, -d / 2, d, d);
+        } else if (gameId === 'homescapes') {
+          drawHomescapesPiece(ctx, cell.piece.color, 0, 0, size * 0.38);
+        } else {
+          drawGardenscapesPiece(ctx, cell.piece.color, 0, 0, size * 0.38);
+        }
       }
       if (colorblind) drawColorblindBadge(ctx, cell.piece.color, size);
     }
@@ -363,6 +365,14 @@ function drawPowerup3D(ctx, power, size, timeSec, isSuper = false) {
   ctx.save();
   if (isSuper && (power === 'g_rainbow' || power === 'rainbow_ball')) {
     drawSuperRainbowHalo(ctx, size, timeSec);
+  }
+  if ((power === 'rainbow_ball' || power === 'g_rainbow') && tryDrawMatch3Model3D(ctx, 'rainbow', d * 1.06)) {
+    ctx.restore();
+    return;
+  }
+  if ((power === 'h_bomb' || power === 'g_bomb' || power === 'g_tnt') && tryDrawMatch3Model3D(ctx, 'bomb', d * 1.06)) {
+    ctx.restore();
+    return;
   }
 
   const spriteMap = {

@@ -9,6 +9,7 @@
 import { getHomescapesAreasForTier } from '../data/homescapesStory.js';
 import { normalizeHogwartsHouse } from '../data/houseCommonRooms.js';
 import { sprites } from '../utils/spriteLoader.js';
+import { getWorld3DStage } from '../world3d/world3dStage.js';
 import {
   computeWanderingPetPos,
   drawReparoSpellBeam,
@@ -18,6 +19,7 @@ import {
 import {
   ROOM_ANCHORS,
   drawCornerCobwebs,
+  prepareCastleGroundAndHotspots,
   renderCastleRoomSlots,
 } from './homescapesVfx.js';
 import {
@@ -327,7 +329,26 @@ export class HomescapesWorldRenderer {
     }
 
     this.hotspots = [];
-    renderCastleRoomSlots(this, ctx, area, scene, sc, timeSec);
+    prepareCastleGroundAndHotspots(this, ctx, area, scene, sc, timeSec);
+
+    const baseAustin = scene.pt(anchors.austin[0], anchors.austin[1]);
+    let ax = baseAustin.x;
+    let ay = baseAustin.y;
+    if (this.spellCast) {
+      const walkAmt = Math.sin(Math.min(1, this.spellCast.t / this.spellCast.duration) * Math.PI) * 0.36;
+      ax += (this.spellCast.tx - ax) * walkAmt;
+      ay += (this.spellCast.ty - ay) * walkAmt;
+    }
+    const pPt = scene.pt(anchors.pet[0], anchors.pet[1]);
+    const { x: px, y: py } = computeWanderingPetPos(pPt, this.hotspots, sc, timeSec, this.petHop);
+
+    // Hybrid 3D WebGL Pass (locked isometric camera + real Blender .glb Castle furniture, Prefect & Hedwig!)
+    const pass3D = getWorld3DStage('homescapes').renderPass(this, area, scene, sc, timeSec, {
+      austinPt: { x: ax, y: ay },
+      petPt: { x: px, y: py },
+    });
+
+    renderCastleRoomSlots(this, ctx, area, scene, sc, timeSec, pass3D.renderedTaskIds, true);
 
     // Ambient Dust Motes + Castle Weather Atmosphere (Day / Starry Night / Great Hall Snow)
     ctx.fillStyle = 'rgba(255, 244, 189, 0.55)';
@@ -348,21 +369,9 @@ export class HomescapesWorldRenderer {
       }
     }
 
-    // Standing 3D Castle Wizard + Hedwig + Reparo Spell Beam!
-    const baseAustin = scene.pt(anchors.austin[0], anchors.austin[1]);
-    let ax = baseAustin.x;
-    let ay = baseAustin.y;
-    if (this.spellCast) {
-      const walkAmt = Math.sin(Math.min(1, this.spellCast.t / this.spellCast.duration) * Math.PI) * 0.36;
-      ax += (this.spellCast.tx - ax) * walkAmt;
-      ay += (this.spellCast.ty - ay) * walkAmt;
-    }
     drawReparoSpellBeam(ctx, this.spellCast, { x: ax, y: ay }, sc, timeSec);
-    drawAustin(ctx, ax, ay, sc * 1.05, timeSec, false, this.austinLine);
-
-    const pPt = scene.pt(anchors.pet[0], anchors.pet[1]);
-    const { x: px, y: py } = computeWanderingPetPos(pPt, this.hotspots, sc, timeSec, this.petHop);
-    drawPet(ctx, px, py, false, timeSec, this.petName, sc * 1.02);
+    drawAustin(ctx, ax, ay, sc * 1.05, timeSec, false, this.austinLine, pass3D.prefectReady);
+    drawPet(ctx, px, py, false, timeSec, this.petName, sc * 1.02, pass3D.petReady);
     this._lastActors = { austin: { x: ax, y: ay }, pet: { x: px, y: py }, scale: sc };
 
     if (!this.readOnlyVisitor) {

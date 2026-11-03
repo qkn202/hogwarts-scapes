@@ -167,14 +167,33 @@ const HEARTH_PROPS_BY_SCENE = [
 /**
  * Renders the 3 extra panoramic Castle slots (`banner`, `alcove`, `hearth`) and registers their hotspots.
  */
-export function renderExtraCastleSlots(renderer, ctx, area, scene, sc, timeSec, sceneIdx, addSpot) {
+export function renderExtraCastleSlots(
+  renderer,
+  ctx,
+  area,
+  scene,
+  sc,
+  timeSec,
+  sceneIdx,
+  addSpot,
+  rendered3DIds = null,
+  skipAddSpot = false
+) {
+  const anchors = ROOM_ANCHORS[sceneIdx % ROOM_ANCHORS.length] || ROOM_ANCHORS[0];
+  const getPt = (task, done) => {
+    if (!skipAddSpot) return addSpot(task, done);
+    const [nx, ny] = anchors[task.slot] || [0.5, 0.6];
+    return scene.pt(nx, ny);
+  };
+
   // 7. Wall Banner & Enchanted Portrait ('banner')
   const bannerTask = area.tasks.find((t) => t.slot === 'banner');
   if (bannerTask) {
     const st = renderer._getTaskStyle(bannerTask);
-    const pt = addSpot(bannerTask, st.done);
+    const pt = getPt(bannerTask, st.done);
+    const has3D = Boolean(rendered3DIds && rendered3DIds.has(bannerTask.id));
     if (st.done) {
-      drawCastleHouseBanner(ctx, pt.x, pt.y, sc, st.styleIdx, st.style, timeSec, st.preview);
+      if (!has3D) drawCastleHouseBanner(ctx, pt.x, pt.y, sc, st.styleIdx, st.style, timeSec, st.preview);
       drawEnchantedPropMotes(ctx, pt.x, pt.y - 10 * sc, sc * 0.85, timeSec, st.style?.secondary || '#ffd166');
     } else {
       ctx.save();
@@ -190,16 +209,19 @@ export function renderExtraCastleSlots(renderer, ctx, area, scene, sc, timeSec, 
   const alcoveTask = area.tasks.find((t) => t.slot === 'alcove');
   if (alcoveTask) {
     const st = renderer._getTaskStyle(alcoveTask);
-    const pt = addSpot(alcoveTask, st.done);
+    const pt = getPt(alcoveTask, st.done);
     const spec = ALCOVE_PROPS_BY_SCENE[sceneIdx % ALCOVE_PROPS_BY_SCENE.length];
+    const has3D = Boolean(rendered3DIds && rendered3DIds.has(alcoveTask.id));
     if (st.done) {
-      drawStyledPropSprite(ctx, spec.key, pt.x, pt.y, spec.size * sc, st.styleIdx, {
-        style: st.style,
-        preview: st.preview,
-        timeSec,
-      });
+      if (!has3D) {
+        drawStyledPropSprite(ctx, spec.key, pt.x, pt.y, spec.size * sc, st.styleIdx, {
+          style: st.style,
+          preview: st.preview,
+          timeSec,
+        });
+      }
       drawEnchantedPropMotes(ctx, pt.x, pt.y - 26 * sc, sc * 0.9, timeSec, st.style?.primary || '#72efdd');
-    } else {
+    } else if (!has3D) {
       drawMovingBoxProp(ctx, pt.x, pt.y, sc * 0.76);
     }
   }
@@ -208,18 +230,21 @@ export function renderExtraCastleSlots(renderer, ctx, area, scene, sc, timeSec, 
   const hearthTask = area.tasks.find((t) => t.slot === 'hearth');
   if (hearthTask) {
     const st = renderer._getTaskStyle(hearthTask);
-    const pt = addSpot(hearthTask, st.done);
+    const pt = getPt(hearthTask, st.done);
     const spec = HEARTH_PROPS_BY_SCENE[sceneIdx % HEARTH_PROPS_BY_SCENE.length];
+    const has3D = Boolean(rendered3DIds && rendered3DIds.has(hearthTask.id));
     if (st.done) {
       if (spec.flame) {
         drawFireplaceFlames(ctx, pt.x, pt.y + 4 * sc, sc * 0.76, timeSec, st.styleIdx, st.style);
       }
-      drawStyledPropSprite(ctx, spec.key, pt.x, pt.y, spec.size * sc, st.styleIdx, {
-        style: st.style,
-        preview: st.preview,
-        timeSec,
-      });
-    } else {
+      if (!has3D) {
+        drawStyledPropSprite(ctx, spec.key, pt.x, pt.y, spec.size * sc, st.styleIdx, {
+          style: st.style,
+          preview: st.preview,
+          timeSec,
+        });
+      }
+    } else if (!skipAddSpot) {
       drawDustPatch(ctx, pt.x, pt.y + 6 * sc, sc * 0.8);
     }
   }

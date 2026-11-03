@@ -26,6 +26,36 @@
   padding: 6px 10px;
 }
 
+.austin-m3-card.has-3d-companion {
+  flex-direction: column;
+  text-align: center;
+  padding: 8px 10px;
+  gap: 5px;
+  background: radial-gradient(circle at 50% 34%, #2b1d42 0%, #12281f 68%, #0c1914 100%);
+  color: #fff3d6;
+  border-color: #ffd166;
+  box-shadow: inset 0 0 18px rgba(114, 239, 221, 0.2);
+}
+
+.austin-m3-card.has-3d-companion #m3-austin-mood {
+  color: #ffe8a3 !important;
+}
+
+.m3-companion-3d-box {
+  width: 100%;
+  height: 112px;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  background: radial-gradient(circle at 50% 42%, rgba(255, 234, 156, 0.22), rgba(12, 25, 20, 0.1) 70%);
+}
+
+.m3-companion-3d-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .austin-m3-card img {
   width: 48px;
   height: 48px;
@@ -203,6 +233,16 @@
     justify-content: center;
     gap: 8px;
     padding: 8px 10px;
+  }
+  .austin-m3-card.has-3d-companion {
+    flex-direction: row;
+    text-align: left;
+    padding: 4px 8px;
+  }
+  .m3-companion-3d-box {
+    width: 68px;
+    height: 62px;
+    flex-shrink: 0;
   }
   .moves-box {
     padding: 6px 12px;

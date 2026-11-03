@@ -319,7 +319,15 @@ export function refreshLives(state) {
 }
 
 export function loadPrefs() {
-  const defaults = { bgm: true, sfx: true, haptics: true, nightmare: false, volume: 80, colorblind: false };
+  const defaults = {
+    bgm: true,
+    sfx: true,
+    haptics: true,
+    nightmare: false,
+    volume: 80,
+    colorblind: false,
+    graphics3d: true,
+  };
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.prefs);
     if (!raw) return defaults;
@@ -332,6 +340,7 @@ export function loadPrefs() {
       nightmare: Boolean(parsed.nightmare),
       volume: vol,
       colorblind: Boolean(parsed.colorblind),
+      graphics3d: parsed.graphics3d !== false,
     };
   } catch {
     return defaults;

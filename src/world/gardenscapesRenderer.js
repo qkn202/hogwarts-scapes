@@ -5,14 +5,20 @@
  */
 
 import { GARDENSCAPES_AREAS } from '../data/gardenscapesStory.js';
+import { normalizeHogwartsHouse } from '../data/houseCommonRooms.js';
 import { sprites } from '../utils/spriteLoader.js';
+import { getWorld3DStage } from '../world3d/world3dStage.js';
 import {
   computeWanderingPetPos,
   drawReparoSpellBeam,
   drawWeatherAtmosphere,
   tryHandleActorTap,
 } from './gardenscapesExtras.js';
-import { GARDEN_ANCHORS, renderGardenZoneSlots } from './gardenscapesSlots.js';
+import {
+  GARDEN_ANCHORS,
+  prepareGardenGroundAndHotspots,
+  renderGardenZoneSlots,
+} from './gardenscapesSlots.js';
 import { drawFloatingMagicMotes } from './gardenscapesVfx.js';
 import {
   drawAustin,
@@ -29,6 +35,7 @@ export class GardenscapesWorldRenderer {
     this.onSlotClick = onSlotClick;
 
     this.areaIndex = 0;
+    this.house = 'gryffindor';
     this.completedTasks = {};
     this.previewOverride = null;
     this.petName = 'Niffler';
@@ -82,10 +89,11 @@ export class GardenscapesWorldRenderer {
     return GARDEN_ANCHORS[sIdx] || GARDEN_ANCHORS[0];
   }
 
-  setState({ areaIndex, completedTasks, petName, weather, readOnlyVisitor, previewOverride = null, austinLine = null }) {
+  setState({ areaIndex, house, completedTasks, petName, weather, readOnlyVisitor, previewOverride = null, austinLine = null }) {
     const prevArea = this._focusedArea;
     const prevVisitor = this._wasVisitor;
     if (areaIndex !== undefined) this.areaIndex = areaIndex;
+    if (house) this.house = normalizeHogwartsHouse(house);
     if (completedTasks) this.completedTasks = completedTasks;
     if (petName) this.petName = petName;
     if (weather) this.weather = weather;
@@ -305,7 +313,26 @@ export class GardenscapesWorldRenderer {
     }
 
     this.hotspots = [];
-    renderGardenZoneSlots(this, ctx, area, scene, sc, timeSec);
+    const orderedSlots = prepareGardenGroundAndHotspots(this, ctx, area, scene, sc, timeSec);
+
+    const baseAustin = scene.pt(anchors.austin[0], anchors.austin[1]);
+    let ax = baseAustin.x;
+    let ay = baseAustin.y;
+    if (this.spellCast) {
+      const walkAmt = Math.sin(Math.min(1, this.spellCast.t / this.spellCast.duration) * Math.PI) * 0.36;
+      ax += (this.spellCast.tx - ax) * walkAmt;
+      ay += (this.spellCast.ty - ay) * walkAmt;
+    }
+    const pPt = scene.pt(anchors.pet[0], anchors.pet[1]);
+    const { x: px, y: py } = computeWanderingPetPos(pPt, this.hotspots, sc, timeSec, this.petHop);
+
+    // Hybrid 3D WebGL Pass (locked isometric camera + real Blender .glb relics, Prefect & Niffler!)
+    const pass3D = getWorld3DStage('gardenscapes').renderPass(this, area, scene, sc, timeSec, {
+      austinPt: { x: ax, y: ay },
+      petPt: { x: px, y: py },
+    });
+
+    renderGardenZoneSlots(this, ctx, area, scene, sc, timeSec, pass3D.renderedTaskIds, orderedSlots);
 
     drawFloatingMagicMotes(ctx, w, h, sc, timeSec);
     drawWeatherAtmosphere(ctx, w, h, sc, timeSec, this.weather);
@@ -317,20 +344,9 @@ export class GardenscapesWorldRenderer {
       }
     }
 
-    const baseAustin = scene.pt(anchors.austin[0], anchors.austin[1]);
-    let ax = baseAustin.x;
-    let ay = baseAustin.y;
-    if (this.spellCast) {
-      const walkAmt = Math.sin(Math.min(1, this.spellCast.t / this.spellCast.duration) * Math.PI) * 0.36;
-      ax += (this.spellCast.tx - ax) * walkAmt;
-      ay += (this.spellCast.ty - ay) * walkAmt;
-    }
     drawReparoSpellBeam(ctx, this.spellCast, { x: ax, y: ay }, sc, timeSec);
-    drawAustin(ctx, ax, ay, sc * 1.08, timeSec, true, this.austinLine);
-
-    const pPt = scene.pt(anchors.pet[0], anchors.pet[1]);
-    const { x: px, y: py } = computeWanderingPetPos(pPt, this.hotspots, sc, timeSec, this.petHop);
-    drawPet(ctx, px, py, true, timeSec, this.petName, sc * 1.04);
+    drawAustin(ctx, ax, ay, sc * 1.08, timeSec, true, this.austinLine, pass3D.prefectReady);
+    drawPet(ctx, px, py, true, timeSec, this.petName, sc * 1.04, pass3D.petReady);
     this._lastActors = { austin: { x: ax, y: ay }, pet: { x: px, y: py }, scale: sc };
 
     if (!this.readOnlyVisitor) {

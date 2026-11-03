@@ -1,7 +1,7 @@
-const SHELL_CACHE = 'hogwarts-shell-v9';
-const ASSET_CACHE = 'hogwarts-assets-v9';
+const SHELL_CACHE = 'hogwarts-shell-v10';
+const ASSET_CACHE = 'hogwarts-assets-v10';
 const PRECACHE_URLS = ['/index.html', '/homescapes.html', '/gardenscapes.html', '/manifest.webmanifest'];
-const MAX_ASSET_ENTRIES = 140;
+const MAX_ASSET_ENTRIES = 180;
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
