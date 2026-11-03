@@ -13,8 +13,10 @@ import {
 } from '../data/liveOpsDefs.js';
 import { getGoalBadgeMeta } from '../match3/pieceArt.js';
 import { closeModal, openModal } from '../utils/dialogHelper.js';
+import { awardMatch3FarmDrops } from '../utils/farmStorage.js';
 import { sound } from '../utils/sound.js';
 import { refreshLives } from '../utils/storage.js';
+import { toggleFarmMode } from './farmController.js';
 import { INGAME_BOOSTER_DEFS, openLevelBriefingModal, renderBadgeVisual } from './modals.js';
 import { syncOnlineProfile } from './onlineHubModal.js';
 import { openMatch3PauseModal } from './settingsAndStyle.js';
@@ -119,6 +121,9 @@ export function handleMatch3Victory(app, { score, bonusCoins, starReward, coinRe
   const droppedCards = isFrontier
     ? rollLevelVictoryCardDrop(boardDef, app.save, Boolean(boardDef.nightmare))
     : [];
+  const farmDrops = app.farm
+    ? awardMatch3FarmDrops(app.farm, boardDef, app.save.winStreak)
+    : [];
 
   app.save.stars += earnedStars;
   app.save.coins += totalCoins;
@@ -139,6 +144,13 @@ export function handleMatch3Victory(app, { score, bonusCoins, starReward, coinRe
     droppedCards.length > 0
       ? `<div style="margin:8px 0; padding:8px 12px; border-radius:12px; background:#fff3b0; border:2px solid #d4af37; font-weight:800; font-size:0.84rem;">
           🐸 Rơi Thẻ Ếch Sô-cô-la: ${droppedCards.map((c) => `${c.icon} ${c.name}${c.isNew ? ' (MỚI!)' : ' (+60💰)'}`).join(', ')}
+        </div>`
+      : '';
+
+  const farmBanner =
+    farmDrops.length > 0
+      ? `<div style="margin:8px 0; padding:8px 12px; border-radius:12px; background:#d8f3dc; border:2px solid #40916c; color:#1b4332; font-weight:800; font-size:0.83rem;">
+          🌾 Quà Nông Trại Hang Sóc: ${farmDrops.join(' · ')}
         </div>`
       : '';
 
@@ -163,9 +175,13 @@ export function handleMatch3Victory(app, { score, bonusCoins, starReward, coinRe
         <div class="goal-chip">🧹 ${app.save.raceState?.playerWins || 0}/10 · 🔥 ${app.save.gobletState?.step || 0}/7</div>
       </div>
       ${cardBanner}
+      ${farmBanner}
       <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
         <button type="button" class="btn-playrix btn-purple" id="vic-world-btn">
           ${app.gameId === 'homescapes' ? '🏰 Về Lâu Đài' : '🌲 Về Khuôn Viên'}
+        </button>
+        <button type="button" class="btn-playrix btn-gold" id="vic-farm-btn">
+          🌾 Gieo Hạt Ngay
         </button>
         <button type="button" class="btn-playrix" id="vic-next-btn" autofocus>
           ▶ Chơi Tiếp Màn ${app.save.level}
@@ -177,6 +193,12 @@ export function handleMatch3Victory(app, { score, bonusCoins, starReward, coinRe
     closeModal(dialog).then(() =>
       app.enterWorldView('Dùng Ngôi Sao Phép vừa nhận để khôi phục Hogwarts thôi nào!')
     );
+  };
+  document.getElementById('vic-farm-btn').onclick = () => {
+    closeModal(dialog).then(() => {
+      app.enterWorldView();
+      toggleFarmMode(app, true);
+    });
   };
   document.getElementById('vic-next-btn').onclick = () => {
     // Leave the finished board first so closing the briefing never strands the player on a dead level
@@ -228,7 +250,7 @@ export function handleMatch3OutOfMoves(app, clockExploded = false) {
     onTournamentLevelFail(app.save);
     app.persistAndSyncHud();
     closeModal(dialog).then(() =>
-      app.enterWorldView('Đừng nản lòng! Mở Hội Nhà Hogwarts để xin thêm Tim ❤️ từ đồng đội nhé!')
+      app.enterWorldView('💡 Mẹo: Ghé 🌾 Trang Trại Hang Sóc để nấu Thuốc Hồi Tim ❤️ & rèn Đũa Phép Phá Ô nhé!')
     );
   };
   openModal(dialog);

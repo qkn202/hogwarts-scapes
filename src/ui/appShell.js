@@ -17,6 +17,7 @@ import { GardenscapesWorldRenderer } from '../world/gardenscapesRenderer.js';
 import { HomescapesWorldRenderer } from '../world/homescapesRenderer.js';
 import { PinMinigameController } from '../world/pinMinigame.js';
 import { openEventsModal } from './eventsModal.js';
+import { initFarmSystem, stopFarmIfActive, syncFarmHudBadge } from './farmController.js';
 import {
   handleMatch3OutOfMoves,
   handleMatch3Victory,
@@ -91,6 +92,7 @@ export class ScapesApp {
     this.pinController = new PinMinigameController(pinCanvas, (res) => this._handlePinResult(res));
 
     this._bindShellControls();
+    initFarmSystem(this);
     initDialogs((dialog) => {
       if (dialog.id === 'dialog-pin') this.pinController.stop();
       if (dialog.id === 'dialog-online') stopTeamChatPolling();
@@ -118,6 +120,7 @@ export class ScapesApp {
   }
 
   getActiveWorldRenderer() {
+    if (this.inFarmMode && this.farmRenderer) return this.farmRenderer;
     const worldId = this.visitingGarden ? this.visitorWorld || this.gameId : this.gameId;
     return worldId === 'homescapes' ? this.homeRenderer : this.gardenRenderer;
   }
@@ -137,6 +140,7 @@ export class ScapesApp {
   showLauncher() {
     this.screen = 'launcher';
     dismissLevelTour();
+    stopFarmIfActive(this);
     document.body.removeAttribute('data-active-game');
     this.homeRenderer.stop();
     this.gardenRenderer.stop();
@@ -177,6 +181,7 @@ export class ScapesApp {
   enterWorldView(austinLine = null) {
     this.screen = 'world';
     dismissLevelTour();
+    stopFarmIfActive(this);
     this.shellEl.setAttribute('data-screen', 'world');
     this.pendingDesign = null;
     this.styleBarEl.classList.add('hidden');
@@ -333,6 +338,7 @@ export class ScapesApp {
 
     this.screen = 'match3';
     this.shellEl.setAttribute('data-screen', 'match3');
+    stopFarmIfActive(this);
     this.pendingDesign = null;
     this.styleBarEl.classList.add('hidden');
     this.homeRenderer.stop();
@@ -413,6 +419,7 @@ export class ScapesApp {
 
     syncWeatherButton(this);
     syncPlayrixWorldBadges(this, area, diff);
+    syncFarmHudBadge(this);
   }
 
   _bindShellControls() {

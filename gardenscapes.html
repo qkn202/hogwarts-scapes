@@ -59,14 +59,17 @@
           <strong id="visitor-banner-text" style="font-size:0.86rem;">👀 Đang thăm Khuôn viên</strong>
           <div class="visitor-banner-actions" style="display:flex; gap:6px; flex-wrap:wrap;">
             <button type="button" class="btn-playrix btn-purple" id="btn-visitor-toggle-world" style="padding:6px 10px; font-size:0.8rem;">🏰 Xem Lâu Đài</button>
+            <button type="button" class="btn-playrix btn-gold" id="btn-visitor-water" style="padding:6px 10px; font-size:0.8rem;">💧 Tưới Cây (+25💰 +1💧)</button>
             <button type="button" class="btn-playrix btn-gold" id="btn-visitor-kudos" style="padding:6px 10px; font-size:0.8rem;">🎆 Khen Đẹp (+20 💰)</button>
             <button type="button" class="btn-playrix btn-gold" id="btn-exit-visitor" style="padding:6px 12px; font-size:0.82rem;">🚪 Về Vườn Của Tôi</button>
           </div>
         </div>
         <div id="style-picker-bar" class="style-picker-bar hidden"></div>
+        <div id="farm-tool-belt" class="farm-tool-belt hidden" role="toolbar" aria-label="Thanh Hạt Giống &amp; Công Cụ Nông Trại"></div>
         <div class="world-dock">
           <div class="dock-left">
             <button type="button" class="btn-playrix btn-gold" id="btn-open-tablet">📜 <span class="dock-btn-label">Sổ Cổ Vật</span><span class="dock-btn-extra"> Hogwarts</span> <span id="tablet-badge" class="notif-badge hidden">0</span></button>
+            <button type="button" class="btn-playrix btn-gold" id="btn-toggle-farm">🌾 <span class="dock-btn-label">Trang Trại</span> <span id="farm-badge" class="notif-badge hidden">0</span></button>
             <button type="button" class="btn-playrix btn-purple" id="btn-open-pin">🔑 <span class="dock-btn-extra">Hầm Ngục </span><span class="dock-btn-label">Gringotts</span> <span id="pin-badge" class="notif-badge hidden">0</span></button>
           </div>
           <button type="button" class="btn-playrix play-level-cta" id="btn-open-briefing">
@@ -158,6 +161,10 @@
     <dialog id="dialog-events" class="playrix-modal" closedby="any" aria-labelledby="events-title">
       <div class="modal-header"><h2 id="events-title">🏆 Vé Phượng Hoàng &amp; Thẻ Ếch Sô-cô-la</h2><button type="button" class="modal-close-btn" data-dialog-close="close" aria-label="Đóng">✕</button></div>
       <div class="modal-body" id="events-body"></div>
+    </dialog>
+    <dialog id="dialog-farm" class="playrix-modal" closedby="any" aria-labelledby="farm-modal-title">
+      <div class="modal-header"><h2 id="farm-modal-title">🌾 Nông Trại Hang Sóc — Đơn Cú &amp; Bếp Phép</h2><button type="button" class="modal-close-btn" data-dialog-close="close" aria-label="Đóng">✕</button></div>
+      <div class="modal-body" id="farm-modal-body"></div>
     </dialog>
 
     <div id="hogwarts-tour" class="hogwarts-tour" popover="manual" role="dialog" aria-labelledby="tour-step-title">

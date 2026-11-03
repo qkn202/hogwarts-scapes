@@ -13,6 +13,7 @@ import {
   spawnCelebrationFireworks,
 } from '../world/gardenscapesExtras.js';
 import { getGameAreas } from './modals.js';
+import { syncVisitorWaterButton } from './farmController.js';
 import { apiRequest } from './onlineApi.js';
 import { syncOnlineProfile } from './onlineHubModal.js';
 
@@ -49,6 +50,7 @@ export function syncVisitorBanner(app) {
   if (exitBtn) {
     exitBtn.textContent = app.gameId === 'homescapes' ? '🚪 Về Lâu Đài Tôi' : '🚪 Về Vườn Tôi';
   }
+  syncVisitorWaterButton(app);
   banner.classList.remove('hidden');
   document.querySelector('.world-dock')?.classList.add('hidden');
 }
@@ -98,6 +100,11 @@ export function bindVisitorControls(app) {
   });
 
   document.getElementById('btn-area-prev')?.addEventListener('click', () => {
+    if (app.inFarmMode) {
+      sound.sfxClick();
+      app.enterWorldView();
+      return;
+    }
     if (app.visitingGarden) {
       if (app.visitorAreaIndex > 0) {
         app.visitorAreaIndex -= 1;
@@ -114,6 +121,11 @@ export function bindVisitorControls(app) {
   });
 
   document.getElementById('btn-area-next')?.addEventListener('click', () => {
+    if (app.inFarmMode) {
+      sound.sfxClick();
+      app.enterWorldView();
+      return;
+    }
     const activeWorld = app.visitingGarden ? app.visitorWorld || app.gameId : app.gameId;
     const vg = app.visitingGarden;
     const activeMastery = vg

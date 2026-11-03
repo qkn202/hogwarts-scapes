@@ -35,7 +35,7 @@
             <li>💀 Boss Mật Thất 2 Giai Đoạn &amp; Chế Độ Ác Mộng x2</li>
             <li>🏰 Hội 4 Nhà Online · Phòng Sinh Hoạt Chương 1 Theo Nhà</li>
             <li>🗺️ Đại Bản Đồ 12 Chương · 108 Chỗ Trang Trí 3 Kiểu</li>
-            <li>☀️/🌙/❄️ Đổi Không Khí 2.5D &amp; Radar Thu Phóng</li>
+            <li>🌾 Nông Trại Hang Sóc · Trồng Thảo Dược &amp; Đại Tiệc (+⭐)</li>
           </ul>
           <div class="card-save-summary" id="launcher-home-summary">
             <span>Màn 1/77,777</span><span>⭐ 2</span><span>💰 1,500</span>
@@ -65,7 +65,7 @@
             <li>💀 Boss Cuộn 2 Giai Đoạn &amp; Chế Độ Ác Mộng x2</li>
             <li>🏰 Hội 4 Nhà Online · Chat · Xin Tim &amp; Thăm Vườn</li>
             <li>🗺️ Đại Bản Đồ 12 Khu Vực · 108 Cổ Vật Trang Trí 3 Kiểu</li>
-            <li>☀️/🌙/❄️ Đổi Thời Tiết 2.5D &amp; Radar Thu Phóng</li>
+            <li>🌾 Nông Trại Hang Sóc · Lướt Thu Hoạch, Đơn Cú &amp; Bếp Phép</li>
           </ul>
           <div class="card-save-summary" id="launcher-garden-summary">
             <span>Màn 1/77,777</span><span>⭐ 1</span><span>💰 900</span>
@@ -137,6 +137,7 @@
           <strong id="visitor-banner-text" style="font-size:0.86rem;">👀 Đang thăm Khuôn viên</strong>
           <div class="visitor-banner-actions" style="display:flex; gap:6px; flex-wrap:wrap;">
             <button type="button" class="btn-playrix btn-purple" id="btn-visitor-toggle-world" style="padding:6px 10px; font-size:0.8rem;">🌿 Xem Khuôn Viên</button>
+            <button type="button" class="btn-playrix btn-gold" id="btn-visitor-water" style="padding:6px 10px; font-size:0.8rem;">💧 Tưới Cây (+25💰 +1💧)</button>
             <button type="button" class="btn-playrix btn-gold" id="btn-visitor-kudos" style="padding:6px 10px; font-size:0.8rem;">🎆 Khen Đẹp (+20 💰)</button>
             <button type="button" class="btn-playrix btn-gold" id="btn-exit-visitor" style="padding:6px 12px; font-size:0.82rem;">🚪 Về Vườn Của Tôi</button>
           </div>
@@ -144,11 +145,15 @@
 
         <!-- 3-Style Live Preview Customization Bar -->
         <div id="style-picker-bar" class="style-picker-bar hidden"></div>
+        <div id="farm-tool-belt" class="farm-tool-belt hidden" role="toolbar" aria-label="Thanh Hạt Giống &amp; Công Cụ Nông Trại"></div>
 
         <div class="world-dock">
           <div class="dock-left">
             <button type="button" class="btn-playrix btn-gold" id="btn-open-tablet">
               🗺️ <span class="dock-btn-label">Bản Đồ</span><span class="dock-btn-extra"> Phép Thuật</span> <span id="tablet-badge" class="notif-badge hidden">0</span>
+            </button>
+            <button type="button" class="btn-playrix btn-gold" id="btn-toggle-farm">
+              🌾 <span class="dock-btn-label">Trang Trại</span> <span id="farm-badge" class="notif-badge hidden">0</span>
             </button>
             <button type="button" class="btn-playrix btn-purple" id="btn-open-pin">
               🔑 <span class="dock-btn-extra">Hầm Ngục </span><span class="dock-btn-label">Gringotts</span> <span id="pin-badge" class="notif-badge hidden">0</span>
@@ -288,6 +293,10 @@
     <dialog id="dialog-events" class="playrix-modal" closedby="any" aria-labelledby="events-title">
       <div class="modal-header"><h2 id="events-title">🏆 Vé Phượng Hoàng &amp; Thẻ Ếch Sô-cô-la</h2><button type="button" class="modal-close-btn" data-dialog-close="close" aria-label="Đóng">✕</button></div>
       <div class="modal-body" id="events-body"></div>
+    </dialog>
+    <dialog id="dialog-farm" class="playrix-modal" closedby="any" aria-labelledby="farm-modal-title">
+      <div class="modal-header"><h2 id="farm-modal-title">🌾 Nông Trại Hang Sóc — Đơn Cú &amp; Bếp Phép</h2><button type="button" class="modal-close-btn" data-dialog-close="close" aria-label="Đóng">✕</button></div>
+      <div class="modal-body" id="farm-modal-body"></div>
     </dialog>
 
     <div id="hogwarts-tour" class="hogwarts-tour" popover="manual" role="dialog" aria-labelledby="tour-step-title">

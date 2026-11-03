@@ -1,5 +1,5 @@
-const SHELL_CACHE = 'hogwarts-shell-v12-classic';
-const ASSET_CACHE = 'hogwarts-assets-v12-classic';
+const SHELL_CACHE = 'hogwarts-shell-v13-farmscapes';
+const ASSET_CACHE = 'hogwarts-assets-v13-farmscapes';
 const PRECACHE_URLS = ['/index.html', '/homescapes.html', '/gardenscapes.html', '/manifest.webmanifest'];
 const MAX_ASSET_ENTRIES = 140;
 
