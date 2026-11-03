@@ -1,10 +1,9 @@
 /**
  * 3D Renovation Relic & Castle Furniture Synchronizer (`world3dProps.js`)
- * Maps all 12 Gardenscapes Zones & 12 Homescapes Chapters (+ 4 House Common Rooms)
- * onto real Blender `.glb` models with 3-style PBR recoloring, spring pop-in & spin animations!
+ * Places all 12 Gardenscapes Zones & 12 Homescapes Chapters (+ 4 House Common Rooms)
+ * directly in canonical 3D world space `(wx, wy, wz)` under `PerspectiveCamera(26°)`!
  */
 
-import * as THREE from 'three';
 import { GARDEN_ANCHORS, ZONE_RELIC_PROPS } from '../world/gardenscapesSlots.js';
 import { ROOM_ANCHORS } from '../world/homescapesSlotsExtra.js';
 import {
@@ -13,6 +12,8 @@ import {
   createContactShadowDisc,
   hasGlbLoaded,
 } from './glbBank.js';
+
+const WORLD_UNIT_MUL = 1.22;
 
 const ALCOVE_SPEC = [
   { key: 'g_prop_telescope', size: 128 },
@@ -32,9 +33,6 @@ const HEARTH_SPEC = [
   { key: 'g_prop_lamp', size: 132 },
 ];
 
-/**
- * Evaluates a damped Playrix elastic pop-in scale (`0 -> 1.18 -> 1.0`) + spin angle.
- */
 function evalSpringPop(elapsed) {
   if (elapsed >= 0.85) return { scaleMul: 1, spinY: 0 };
   const t = Math.max(0, elapsed / 0.85);
@@ -45,7 +43,7 @@ function evalSpringPop(elapsed) {
   return { scaleMul: Math.max(0.05, scaleMul), spinY };
 }
 
-export function buildGarden3DSlotDescriptors(renderer, area, scene, sc) {
+export function buildGarden3DSlotDescriptors(renderer, area, scene) {
   const zoneMod = (area.sceneIndex ?? renderer.areaIndex) % GARDEN_ANCHORS.length;
   const anchors = GARDEN_ANCHORS[zoneMod] || GARDEN_ANCHORS[0];
   const relicMap = ZONE_RELIC_PROPS[zoneMod] || ZONE_RELIC_PROPS[0];
@@ -56,18 +54,42 @@ export function buildGarden3DSlotDescriptors(renderer, area, scene, sc) {
     const spec = relicMap[slot];
     if (!task || !spec?.key) continue;
     const st = renderer._getTaskStyle(task);
-    if (!st.done) continue;
     const [nx, ny] = anchors[slot] || [0.5, 0.6];
-    const pt = scene.pt(nx, ny);
+    const wPos = scene.normToWorld(nx, ny, 0, slot);
+
+    if (!st.done) {
+      if (spec.vfx !== 'boat' && (slot === 'centerpiece' || slot === 'seating' || slot === 'special')) {
+        list.push({
+          slotId: `${area.id}:${task.id}:crate`,
+          taskId: task.id,
+          propKey: 'h_prop_crate',
+          wx: wPos.x,
+          wy: 0,
+          wz: wPos.z,
+          worldSize: 86 * WORLD_UNIT_MUL,
+          styleIdx: 0,
+          style: null,
+          preview: false,
+          yaw: nx < 0.5 ? 0.54 : -0.52,
+          vfx: '',
+          flatFloor: false,
+          hanging: false,
+          isCrate: true,
+        });
+      }
+      continue;
+    }
+
     const propKey = spec.vfx === 'willow_shrine' && st.styleIdx > 0 ? 'g_prop_willow' : spec.key;
     const yaw = spec.flipX ? -0.58 : nx < 0.45 ? 0.54 : nx > 0.62 ? -0.52 : 0.36;
     list.push({
       slotId: `${area.id}:${task.id}`,
       taskId: task.id,
       propKey,
-      x: pt.x,
-      y: pt.y,
-      sizePx: spec.size * sc,
+      wx: wPos.x,
+      wy: spec.vfx === 'boat' ? 2.2 : 0,
+      wz: wPos.z,
+      worldSize: spec.size * WORLD_UNIT_MUL,
       styleIdx: st.styleIdx,
       style: st.style,
       preview: st.preview,
@@ -75,12 +97,13 @@ export function buildGarden3DSlotDescriptors(renderer, area, scene, sc) {
       vfx: spec.vfx || '',
       flatFloor: false,
       hanging: false,
+      isCrate: false,
     });
   }
   return list;
 }
 
-export function buildCastle3DSlotDescriptors(renderer, area, scene, sc) {
+export function buildCastle3DSlotDescriptors(renderer, area, scene) {
   const rawScene = area.sceneIndex ?? renderer.areaIndex;
   const roomIdx = ((rawScene % ROOM_ANCHORS.length) + ROOM_ANCHORS.length) % ROOM_ANCHORS.length;
   const anchors = ROOM_ANCHORS[roomIdx] || ROOM_ANCHORS[0];
@@ -91,7 +114,7 @@ export function buildCastle3DSlotDescriptors(renderer, area, scene, sc) {
     if (!task) return;
     const st = renderer._getTaskStyle(task);
     const [nx, ny] = anchors[slot] || [0.5, 0.6];
-    const pt = opts.overridePt || scene.pt(nx, ny);
+    const wPos = opts.overrideWorld || scene.normToWorld(nx, ny, 0, slot);
 
     if (!st.done) {
       if (opts.crateWhenUndone) {
@@ -99,9 +122,10 @@ export function buildCastle3DSlotDescriptors(renderer, area, scene, sc) {
           slotId: `${area.id}:${task.id}:crate`,
           taskId: task.id,
           propKey: 'h_prop_crate',
-          x: pt.x,
-          y: pt.y,
-          sizePx: 82 * sc * (opts.crateScale || 1),
+          wx: wPos.x,
+          wy: 0,
+          wz: wPos.z,
+          worldSize: 82 * WORLD_UNIT_MUL * (opts.crateScale || 1),
           styleIdx: 0,
           style: null,
           preview: false,
@@ -109,6 +133,7 @@ export function buildCastle3DSlotDescriptors(renderer, area, scene, sc) {
           vfx: '',
           flatFloor: false,
           hanging: false,
+          isCrate: true,
         });
       }
       return;
@@ -118,9 +143,10 @@ export function buildCastle3DSlotDescriptors(renderer, area, scene, sc) {
       slotId: `${area.id}:${task.id}`,
       taskId: task.id,
       propKey,
-      x: pt.x,
-      y: pt.y,
-      sizePx: sizeBase * sc,
+      wx: wPos.x,
+      wy: opts.wy ?? wPos.y ?? 0,
+      wz: wPos.z,
+      worldSize: sizeBase * WORLD_UNIT_MUL,
       styleIdx: st.styleIdx,
       style: st.style,
       preview: st.preview,
@@ -128,40 +154,49 @@ export function buildCastle3DSlotDescriptors(renderer, area, scene, sc) {
       vfx: opts.vfx || '',
       flatFloor: Boolean(opts.flatFloor),
       hanging: Boolean(opts.hanging),
+      isCrate: false,
     });
   };
 
   // 2. Rug or Potions Island
-  if (roomIdx === 2) pushSlot('rug', 'h_prop_island', 186, { yaw: 0.48, vfx: 'cauldron' });
-  else pushSlot('rug', 'h_prop_rug', 238, { flatFloor: true, yaw: 0.68 });
+  if (roomIdx === 2) pushSlot('rug', 'h_prop_island', 184, { yaw: 0.48, vfx: 'cauldron' });
+  else pushSlot('rug', 'h_prop_rug', 236, { flatFloor: true, wy: 1.9, yaw: 0.68 });
 
-  // 3. Chandelier
-  const ceilOverride = roomIdx === 3 ? scene.pt(0.50, 0.19) : null;
-  pushSlot('curtain', 'h_prop_chandelier', roomIdx === 3 ? 132 : 148, {
+  // 3. Ceiling Chandelier (suspended cleanly inside 3D Castle room!)
+  const ceilWorld = scene.normToWorld(0.5, 0.21, 0, 'curtain_ceiling');
+  pushSlot('curtain', 'h_prop_chandelier', roomIdx === 3 ? 128 : 142, {
     hanging: true,
     yaw: 0.35,
-    overridePt: ceilOverride,
+    overrideWorld: { x: ceilWorld.x, y: 168, z: ceilWorld.z },
+    wy: 168,
     vfx: 'candles',
   });
 
   // 4. Bed / Sofa / Potions Desk
   const bedKey = roomIdx === 0 ? 'h_prop_bed' : roomIdx === 2 ? 'h_prop_desk' : 'h_prop_sofa';
-  const bedSz = roomIdx === 0 ? 214 : roomIdx === 1 ? 184 : roomIdx === 2 ? 158 : 204;
+  const bedSz = roomIdx === 0 ? 208 : roomIdx === 1 ? 182 : roomIdx === 2 ? 156 : 198;
   pushSlot('bed', bedKey, bedSz, {
     yaw: roomIdx === 3 ? -0.56 : 0.62,
     crateWhenUndone: true,
   });
 
   // 5. Study Desk / Potions Cauldron Island / Grand Piano
-  if (roomIdx === 3) pushSlot('desk', 'h_prop_piano', 194, { yaw: -0.58, crateWhenUndone: true, crateScale: 0.85 });
-  else if (roomIdx === 2) pushSlot('desk', 'h_prop_island', 152, { yaw: 0.52, crateWhenUndone: true, crateScale: 0.85 });
-  else pushSlot('desk', 'h_prop_desk', 172, { yaw: roomIdx === 0 ? -0.62 : -0.54, crateWhenUndone: true, crateScale: 0.85 });
+  if (roomIdx === 3) pushSlot('desk', 'h_prop_piano', 190, { yaw: -0.58, crateWhenUndone: true, crateScale: 0.85 });
+  else if (roomIdx === 2) pushSlot('desk', 'h_prop_island', 150, { yaw: 0.52, crateWhenUndone: true, crateScale: 0.85 });
+  else pushSlot('desk', 'h_prop_desk', 168, { yaw: roomIdx === 0 ? -0.62 : -0.54, crateWhenUndone: true, crateScale: 0.85 });
 
   // 6. Decor (Catbed / Trophy Goblet)
-  pushSlot('decor', roomIdx === 0 ? 'h_prop_catbed' : 'h_prop_urn', roomIdx === 0 ? 116 : 126, { yaw: 0.45 });
+  pushSlot('decor', roomIdx === 0 ? 'h_prop_catbed' : 'h_prop_urn', roomIdx === 0 ? 114 : 124, { yaw: 0.45 });
 
-  // 7. Wall Banner
-  pushSlot('banner', 'h_prop_banner', 124, { hanging: true, yaw: 0.42, vfx: 'banner' });
+  // 7. Wall Banner (mounted cleanly on interior Left-Back 3D Castle wall!)
+  const banWorld = scene.normToWorld(0.31, 0.36, 0, 'banner');
+  pushSlot('banner', 'h_prop_banner', 122, {
+    hanging: true,
+    overrideWorld: { x: banWorld.x, y: 122, z: banWorld.z },
+    wy: 122,
+    yaw: 0.63,
+    vfx: 'banner',
+  });
 
   // 8. Alcove
   const alc = ALCOVE_SPEC[roomIdx % ALCOVE_SPEC.length];
@@ -177,15 +212,11 @@ export function buildCastle3DSlotDescriptors(renderer, area, scene, sc) {
 export class World3DPropsManager {
   constructor(parentGroup) {
     this.parentGroup = parentGroup;
-    /** @type {Map<string, { mesh: THREE.Group, propKey: string, styleSig: string, bornAt: number, popFromAction: boolean }>} */
     this.instances = new Map();
     this._knownAreaKey = '';
   }
 
-  /**
-   * Synchronizes active 3D prop instances and returns a Set of `taskId`s whose 3D GLBs rendered!
-   */
-  sync(descriptors, areaKey, timeSec, screenToWorldXZ) {
+  sync(descriptors, areaKey, timeSec) {
     const isAreaSwitch = this._knownAreaKey !== areaKey;
     this._knownAreaKey = areaKey;
 
@@ -219,7 +250,7 @@ export class World3DPropsManager {
         this.parentGroup.add(mesh);
         let shadowDisc = null;
         if (!d.flatFloor && !d.hanging && d.propKey !== 'g_prop_boat') {
-          shadowDisc = createContactShadowDisc(0.44);
+          shadowDisc = createContactShadowDisc(0.45);
           this.parentGroup.add(shadowDisc);
         }
         rec = {
@@ -228,7 +259,7 @@ export class World3DPropsManager {
           propKey: d.propKey,
           styleSig,
           bornAt: timeSec,
-          popFromAction: !isAreaSwitch && !d.slotId.endsWith(':crate'),
+          popFromAction: !isAreaSwitch && !d.isCrate,
         };
         this.instances.set(d.slotId, rec);
       } else if (rec.styleSig !== styleSig) {
@@ -240,7 +271,7 @@ export class World3DPropsManager {
 
       const entry = rec.mesh.userData.glbEntry;
       const fillFactor = d.flatFloor ? 0.92 : d.hanging ? 0.82 : 0.78;
-      let baseScale = (d.sizePx * fillFactor) / Math.max(0.25, entry.maxSpan);
+      let baseScale = (d.worldSize * fillFactor) / Math.max(0.25, entry.maxSpan);
 
       let spinY = 0;
       if (rec.popFromAction) {
@@ -253,31 +284,29 @@ export class World3DPropsManager {
         baseScale *= 1 + Math.sin(timeSec * 5.4) * 0.045;
       }
 
-      // Ground anchor matches `isoMath.js` sprite contact base (`y + sizePx * 0.20`)
-      const baseScreenY = d.flatFloor ? d.y : d.hanging ? d.y + d.sizePx * 0.28 : d.y + d.sizePx * 0.20;
-      const { x: wx, z: wz } = screenToWorldXZ(d.x, baseScreenY);
-
-      let liftY = d.flatFloor ? 0.5 : 0;
+      let wx = d.wx;
+      let liftY = d.wy || 0;
       let pitchX = 0;
       let rollZ = 0;
       if (d.vfx === 'boat' || d.propKey === 'g_prop_boat') {
-        liftY += Math.sin(timeSec * 2.4) * 3.5;
+        wx += Math.sin(timeSec * 0.65) * 18;
+        liftY += Math.sin(timeSec * 2.4) * 3.8;
         pitchX = Math.sin(timeSec * 2.1) * 0.055;
         rollZ = Math.cos(timeSec * 1.8) * 0.045;
       } else if (d.vfx === 'candles' || d.propKey === 'g_prop_candles') {
-        liftY += Math.sin(timeSec * 2.6 + d.x * 0.02) * 3.2;
+        liftY += Math.sin(timeSec * 2.6 + d.wx * 0.02) * 3.5;
       } else if (d.vfx === 'banner' || d.propKey === 'h_prop_banner') {
-        rollZ = Math.sin(timeSec * 2.3 + d.x * 0.01) * 0.05;
+        rollZ = Math.sin(timeSec * 2.3 + d.wx * 0.01) * 0.05;
       }
 
-      rec.mesh.position.set(wx, liftY, wz);
+      rec.mesh.position.set(wx, liftY, d.wz);
       rec.mesh.scale.setScalar(baseScale);
       rec.mesh.rotation.set(pitchX, d.yaw + spinY, rollZ);
 
       if (rec.shadowDisc) {
-        rec.shadowDisc.position.set(wx, 0.35, wz);
-        const sx = Math.max(26, entry.sizeX * baseScale * 1.18);
-        const sz = Math.max(26, entry.sizeZ * baseScale * 1.18);
+        rec.shadowDisc.position.set(wx, 1.1, d.wz);
+        const sx = Math.max(28, entry.sizeX * baseScale * 1.16);
+        const sz = Math.max(28, entry.sizeZ * baseScale * 1.16);
         rec.shadowDisc.scale.set(sx, 1, sz);
         rec.shadowDisc.rotation.y = d.yaw;
       }

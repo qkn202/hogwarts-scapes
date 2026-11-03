@@ -6,17 +6,18 @@
 import { sound } from '../utils/sound.js';
 import { savePrefs } from '../utils/storage.js';
 import { isGraphics3dEnabled, isWebglSupported, setGraphics3dEnabled } from './sharedWebgl.js';
+import { cycleWorld3DCameraAngle } from './world3dStage.js';
 
 export function renderGraphics3DToggleHtml(app, idPrefix = '') {
   const on = app.prefs.graphics3d !== false && isWebglSupported();
   return `
     <div class="task-card">
       <div>
-        <strong>🧊 Đồ Hoạ 3D Blender (WebGL PBR)</strong>
-        <div style="font-size:0.75rem; color:#5c4738;">Mô hình 3D <code>.glb</code> thật, đổ bóng thời gian thực &amp; Huynh trưởng 3D cổ vũ</div>
+        <strong>🧊 Cảnh Lớn Full 3D Blender (WebGL PBR)</strong>
+        <div style="font-size:0.75rem; color:#5c4738;">100% Đồi cỏ, mặt nước GLSL, Hang Sóc &amp; Lâu Đài cắt lớp 3D <code>.glb</code> + Camera Phối Cảnh 3D</div>
       </div>
       <button type="button" class="btn-playrix ${on ? 'btn-gold' : 'btn-purple'}" id="${idPrefix}tog-graphics3d">
-        ${on ? '🧊 3D Bật' : '🖼️ 2.5D'}
+        ${on ? '🧊 Full 3D Bật' : '🖼️ 2.5D'}
       </button>
     </div>
   `;
@@ -33,7 +34,7 @@ export function bindGraphics3DToggle(rootEl, app, idPrefix = '', onRefresh = nul
     sound.sfxClick();
     app.toast?.(
       next
-        ? '🧊 Đã bật Đồ Hoạ Hybrid 3D Blender (Mô hình .glb + Bóng đổ PBR thời gian thực)!'
+        ? '🧊 Đã bật 100% Cảnh Lớn Full 3D (Địa hình, mặt nước GLSL, kiến trúc .glb & Camera 3D)!'
         : '🖼️ Đã chuyển sang chế độ Tiết Kiệm Pin 2.5D Cổ Điển!'
     );
     if (onRefresh) onRefresh();
@@ -50,8 +51,24 @@ export function initPlayrix2025Hud(app) {
   const menuBtn = document.getElementById('btn-magic-menu');
   const drawer = document.getElementById('magic-menu-drawer');
   const designBtn = document.getElementById('btn-design-mode');
+  const camBtn = document.getElementById('btn-cam-angle');
   const coinPill = document.getElementById('hud-coin-pill');
   const menuBadge = document.getElementById('magic-menu-badge');
+
+  if (camBtn) {
+    camBtn.addEventListener('click', () => {
+      sound.sfxClick();
+      if (!isGraphics3dEnabled()) {
+        app.toast?.('🖼️ Hãy bật chế độ Full 3D trong Cài Đặt (⚙️) để xoay góc nhìn 3D!');
+        return;
+      }
+      const worldId = app.visitingGarden ? (app.visitorWorld || app.gameId) : app.gameId;
+      const gameId = worldId === 'homescapes' ? 'homescapes' : 'gardenscapes';
+      const preset = cycleWorld3DCameraAngle(gameId);
+      camBtn.classList.toggle('is-active', preset.id !== 'classic');
+      app.toast?.(`${preset.label} — Kéo hoặc cuộn chuột để cảm nhận chiều sâu 3D thật!`);
+    });
+  }
 
   const closeDrawer = () => {
     if (!drawer || drawer.classList.contains('hidden')) return;

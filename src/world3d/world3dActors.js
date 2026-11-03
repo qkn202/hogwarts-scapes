@@ -1,7 +1,7 @@
 /**
  * 3D Articulated Character & Companion Controller (`char_prefect.glb`, `pet_niffler.glb`, `pet_hedwig.glb`)
  * Drives House-colored Prefect robes/scarf, breathing, head look-around, Reparo wand-casting rotation,
- * and wandering Niffler / Hedwig animations inside the Three.js Isometric World Stage.
+ * and wandering Niffler / Hedwig animations directly in canonical 3D world space!
  */
 
 import * as THREE from 'three';
@@ -41,7 +41,6 @@ export class World3DActorsController {
       this.prefect = cloneGlbInstance('char_prefect', { castShadow: true, receiveShadow: true, centerXZ: true });
       if (this.prefect) {
         this.prefectParts = findNamedParts(this.prefect, ['Head', 'ArmR_Wand', 'ArmL', 'WandTip']);
-        // Capture rest rotations so procedural animation never drifts
         for (const k of Object.keys(this.prefectParts)) {
           this.prefectParts[k].userData.restRot = this.prefectParts[k].rotation.clone();
         }
@@ -90,17 +89,13 @@ export class World3DActorsController {
     return Boolean(this.pet);
   }
 
-  /**
-   * Updates 3D Prefect + Pet world transforms and returns `{ prefectReady, petReady, wandWorldPos }`.
-   */
   sync({
     isGarden,
     house = 'gryffindor',
-    austinScreen,
-    petScreen,
+    austinWorld,
+    petWorld,
     petHop = 0,
     spellCast = null,
-    sc = 1,
     timeSec = 0,
     screenToWorldXZ,
   }) {
@@ -108,26 +103,26 @@ export class World3DActorsController {
     const petReady = this._ensurePet(isGarden, house);
     let wandWorldPos = null;
 
-    if (prefectReady && austinScreen) {
+    if (prefectReady && austinWorld) {
       const entry = this.prefect.userData.glbEntry;
-      const targetHeightPx = (isGarden ? 116 : 112) * sc;
-      const s = targetHeightPx / Math.max(0.4, entry.sizeY);
+      const targetHeight = isGarden ? 148 : 142;
+      const s = targetHeight / Math.max(0.4, entry.sizeY);
       const breathe = 1 + Math.sin(timeSec * 3.1) * 0.018;
 
-      const { x: wx, z: wz } = screenToWorldXZ(austinScreen.x, austinScreen.y);
+      const wx = austinWorld.x;
+      const wz = austinWorld.z;
       this.prefect.position.set(wx, 0, wz);
       this.prefect.scale.set(s, s * breathe, s);
       if (this.prefectShadow) {
-        this.prefectShadow.position.set(wx, 0.4, wz);
-        this.prefectShadow.scale.set(52 * sc, 1, 52 * sc);
+        this.prefectShadow.position.set(wx, 1.1, wz);
+        this.prefectShadow.scale.set(62, 1, 62);
       }
 
-      // Default cozy three-quarter stance; turn left/right toward target while keeping 3/4 face visible!
       let targetYaw = isGarden ? -0.42 : 0.42;
       let castRatio = 0;
       if (spellCast) {
         castRatio = Math.sin(Math.min(1, spellCast.t / Math.max(0.2, spellCast.duration)) * Math.PI);
-        const tgtXZ = screenToWorldXZ(spellCast.tx, spellCast.ty);
+        const tgtXZ = spellCast.worldTarget || screenToWorldXZ(spellCast.tx, spellCast.ty);
         const dx = tgtXZ.x - wx;
         const dz = tgtXZ.z - wz;
         targetYaw = Math.atan2(dx, Math.max(Math.abs(dz) * 0.65, 28));
@@ -161,24 +156,25 @@ export class World3DActorsController {
         wandWorldPos = new THREE.Vector3();
         wandTip.getWorldPosition(wandWorldPos);
       } else {
-        wandWorldPos = new THREE.Vector3(wx, targetHeightPx * 0.62, wz);
+        wandWorldPos = new THREE.Vector3(wx, targetHeight * 0.62, wz);
       }
     }
 
-    if (petReady && petScreen) {
+    if (petReady && petWorld) {
       const entry = this.pet.userData.glbEntry;
-      const targetPetPx = (isGarden ? 62 : 76) * sc;
-      const ps = targetPetPx / Math.max(0.3, entry.maxSpan);
+      const targetPetSpan = isGarden ? 78 : 94;
+      const ps = targetPetSpan / Math.max(0.3, entry.maxSpan);
 
-      const { x: px, z: pz } = screenToWorldXZ(petScreen.x, petScreen.y);
-      const idleHop = Math.abs(Math.sin(timeSec * 4.2)) * (isGarden ? 5.5 : 1.8) * sc;
-      const tapJump = Math.sin(petHop * Math.PI) * 26 * sc;
+      const px = petWorld.x;
+      const pz = petWorld.z;
+      const idleHop = Math.abs(Math.sin(timeSec * 4.2)) * (isGarden ? 6.5 : 2.2);
+      const tapJump = Math.sin(petHop * Math.PI) * 32;
       this.pet.position.set(px, idleHop + tapJump, pz);
       this.pet.scale.setScalar(ps);
       if (this.petShadow) {
-        const hopShrink = Math.max(0.58, 1 - (idleHop + tapJump) / Math.max(40, 80 * sc));
-        this.petShadow.position.set(px, 0.4, pz);
-        this.petShadow.scale.set(38 * sc * hopShrink, 1, 38 * sc * hopShrink);
+        const hopShrink = Math.max(0.58, 1 - (idleHop + tapJump) / 96);
+        this.petShadow.position.set(px, 1.1, pz);
+        this.petShadow.scale.set(44 * hopShrink, 1, 44 * hopShrink);
       }
 
       if (!isGarden) {
@@ -187,7 +183,6 @@ export class World3DActorsController {
         const dx = px - this._prevPetX;
         const dz = pz - this._prevPetZ;
         if (Math.hypot(dx, dz) > 0.35) {
-          // Keep adorable 3/4 front face, snout & gold coins oriented toward the isometric camera!
           const desiredYaw = Math.atan2(dx, Math.max(Math.abs(dz) * 0.75, 18));
           let diff = desiredYaw - this._petYaw;
           while (diff > Math.PI) diff -= Math.PI * 2;

@@ -113,6 +113,7 @@ export function renderWorldSceneTo2D(ctx2d, scene, camera, viewW, viewH) {
 
   ctx2d.save();
   ctx2d.setTransform(1, 0, 0, 1, 0, 0);
+  ctx2d.clearRect(0, 0, targetW, targetH);
   ctx2d.drawImage(renderer.domElement, 0, 0, pw, ph, 0, 0, targetW, targetH);
   ctx2d.restore();
   return true;

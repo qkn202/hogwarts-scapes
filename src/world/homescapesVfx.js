@@ -256,7 +256,27 @@ export function drawCornerCobwebs(ctx, scene, sc) {
   ctx.restore();
 }
 
-export function prepareCastleGroundAndHotspots(renderer, ctx, area, scene, sc, timeSec) {
+export function getCastleSlotScreenAndWorld(scene, slot, nx, ny) {
+  if (!scene?.isFull3D) {
+    const p = scene.pt(nx, ny);
+    return { x: p.x, y: p.y, wx: undefined, wy: 0, wz: undefined };
+  }
+  if (slot === 'curtain') {
+    const cw = scene.normToWorld(0.5, 0.21, 0, 'curtain_ceiling');
+    const p = scene.projectWorld(cw.x, 195, cw.z);
+    return { x: p.x, y: p.y, wx: cw.x, wy: 195, wz: cw.z };
+  }
+  if (slot === 'banner') {
+    const bw = scene.normToWorld(nx, ny, 0, 'banner');
+    const p = scene.projectWorld(bw.x, 165, bw.z);
+    return { x: p.x, y: p.y, wx: bw.x, wy: 165, wz: bw.z };
+  }
+  const fw = scene.normToWorld(nx, ny, 0, slot);
+  const p = scene.projectWorld(fw.x, fw.y, fw.z);
+  return { x: p.x, y: p.y, wx: fw.x, wy: 0, wz: fw.z };
+}
+
+export function prepareCastleGroundAndHotspots(renderer, ctx, area, scene, sc, timeSec, skip2DGround = false) {
   const rawScene = area.sceneIndex ?? renderer.areaIndex;
   const areaIdx = ((rawScene % ROOM_ANCHORS.length) + ROOM_ANCHORS.length) % ROOM_ANCHORS.length;
   const anchors = ROOM_ANCHORS[areaIdx] || ROOM_ANCHORS[0];
@@ -266,18 +286,22 @@ export function prepareCastleGroundAndHotspots(renderer, ctx, area, scene, sc, t
     if (!task) continue;
     const st = renderer._getTaskStyle(task);
     const [nx, ny] = anchors[slot] || [0.5, 0.6];
-    const p = scene.pt(nx, ny);
+    const p = getCastleSlotScreenAndWorld(scene, slot, nx, ny);
     renderer.hotspots.push({
       task,
       nx,
       ny,
       x: p.x,
       y: p.y,
+      wx: p.wx,
+      wy: p.wy,
+      wz: p.wz,
       pinY: p.y - 24 * sc,
       r: Math.max(32, 42 * sc),
       completed: st.done,
     });
 
+    if (skip2DGround) continue;
     if (slot === 'floor') {
       if (st.done) drawCastleFloorInlay(ctx, p.x, p.y, sc, st.styleIdx, st.style, timeSec, st.preview);
       else drawDustPatch(ctx, p.x, p.y, sc * 1.15);
@@ -302,10 +326,10 @@ export function renderCastleRoomSlots(renderer, ctx, area, scene, sc, timeSec, r
   const has3D = (task) => Boolean(task && rendered3DIds && rendered3DIds.has(task.id));
   const addSpot = (task, done) => {
     const [nx, ny] = anchors[task.slot] || [0.5, 0.6];
-    const p = scene.pt(nx, ny);
+    const p = getCastleSlotScreenAndWorld(scene, task.slot, nx, ny);
     if (!groundPrepared) {
       renderer.hotspots.push({
-        task, nx, ny, x: p.x, y: p.y, pinY: p.y - 24 * sc, r: Math.max(32, 42 * sc), completed: done,
+        task, nx, ny, x: p.x, y: p.y, wx: p.wx, wy: p.wy, wz: p.wz, pinY: p.y - 24 * sc, r: Math.max(32, 42 * sc), completed: done,
       });
     }
     return p;

@@ -164,6 +164,32 @@ export function tryHandleActorTap(renderer, clientX, clientY, radiusScale = 1) {
   return false;
 }
 
+export function computeWanderingPetWorld3D(baseWorld, hotspots, timeSec) {
+  const doneSpots = (hotspots || []).filter((h) => h.completed && typeof h.wx === 'number' && (h.wy || 0) < 40);
+  const waypoints = [
+    baseWorld,
+    ...doneSpots.slice(0, 7).map((h) => ({ x: h.wx + 28, z: h.wz + 26 })),
+  ];
+  let wx = baseWorld.x;
+  let wz = baseWorld.z;
+  if (waypoints.length > 1) {
+    const legDur = 5.5;
+    const total = waypoints.length;
+    const cyc = (timeSec / legDur) % total;
+    const idx = Math.floor(cyc);
+    const frac = cyc - idx;
+    const moveT = frac < 0.35 ? 0 : 0.5 - 0.5 * Math.cos(((frac - 0.35) / 0.65) * Math.PI);
+    const a = waypoints[idx];
+    const b = waypoints[(idx + 1) % total];
+    wx = a.x + (b.x - a.x) * moveT;
+    wz = a.z + (b.z - a.z) * moveT;
+  }
+  return {
+    x: wx + Math.sin(timeSec * 1.35) * 11,
+    z: wz + Math.cos(timeSec * 2.1) * 8,
+  };
+}
+
 export function computeWanderingPetPos(basePt, hotspots, sc, timeSec, petHop = 0) {
   const doneSpots = (hotspots || []).filter((h) => h.completed);
   const waypoints = [

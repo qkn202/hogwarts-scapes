@@ -39,6 +39,25 @@ const MODEL_FILES = {
   m3_potion: '/assets/models3d/m3_potion.glb',
   m3_snitch: '/assets/models3d/m3_snitch.glb',
   m3_bomb: '/assets/models3d/m3_bomb.glb',
+
+  // Full 3D Large Outdoor Landmarks & Modular Nature Kit
+  env_burrow_house: '/assets/models3d/env_burrow_house.glb',
+  env_clocktower: '/assets/models3d/env_clocktower.glb',
+  env_hagrid_hut: '/assets/models3d/env_hagrid_hut.glb',
+  env_boathouse: '/assets/models3d/env_boathouse.glb',
+  env_greenhouse: '/assets/models3d/env_greenhouse.glb',
+  env_covered_bridge: '/assets/models3d/env_covered_bridge.glb',
+  env_hogsmeade: '/assets/models3d/env_hogsmeade.glb',
+  kit_tree_oak: '/assets/models3d/kit_tree_oak.glb',
+  kit_tree_pine: '/assets/models3d/kit_tree_pine.glb',
+  kit_garden_foliage: '/assets/models3d/kit_garden_foliage.glb',
+  kit_fence_gate: '/assets/models3d/kit_fence_gate.glb',
+
+  // Full 3D Cutaway Castle Room Architectural Shells
+  env_castle_tower_room: '/assets/models3d/env_castle_tower_room.glb',
+  env_castle_greathall: '/assets/models3d/env_castle_greathall.glb',
+  env_castle_dungeon: '/assets/models3d/env_castle_dungeon.glb',
+  env_castle_study_tower: '/assets/models3d/env_castle_study_tower.glb',
 };
 
 const KEY_ALIASES = {
@@ -218,7 +237,7 @@ export function preloadMatch33DModels() {
 
 export function cloneGlbInstance(
   rawKey,
-  { castShadow = true, receiveShadow = true, centerXZ = false, centerY = false } = {}
+  { castShadow = true, receiveShadow = true, centerXZ = false, centerY = false, preserveOrigin = false } = {}
 ) {
   const key = resolveCanonicalGlbKey(rawKey);
   const entry = MODEL_CACHE.get(key);
@@ -230,11 +249,13 @@ export function cloneGlbInstance(
   const wrapper = new THREE.Group();
   wrapper.name = `Instance_${rawKey}`;
   const inner = entry.template.clone(true);
-  inner.position.set(
-    centerXZ ? -entry.centerX : 0,
-    centerY ? -entry.centerY : -entry.minY,
-    centerXZ ? -entry.centerZ : 0
-  );
+  if (!preserveOrigin) {
+    inner.position.set(
+      centerXZ ? -entry.centerX : 0,
+      centerY ? -entry.centerY : -entry.minY,
+      centerXZ ? -entry.centerZ : 0
+    );
+  }
 
   inner.traverse((node) => {
     if (!node.isMesh) return;
@@ -331,6 +352,38 @@ export function applyActorHouse3D(wrapper, house = 'gryffindor') {
       if (nm.startsWith('Mat_Primary')) setMatColor(mat, pal.primary);
       else if (nm.startsWith('Mat_Secondary')) setMatColor(mat, pal.secondary);
       else if (nm.startsWith('Mat_Emissive')) setMatColor(mat, pal.emissive, pal.emissive, 2.2);
+    }
+  });
+}
+
+const CASTLE_HOUSE_ARCH_THEMES = {
+  gryffindor: { wall: '#ffffff', trim: '#ffffff', floor: '#ffffff', crest: '#a4161a', win: '#ffd166', winEmit: '#ff9e00', hearth: '#ff6b00' },
+  slytherin: { wall: '#94b8a8', trim: '#7f9c90', floor: '#a3b8b0', crest: '#1b7a46', win: '#2ec4b6', winEmit: '#10b981', hearth: '#2dc653' },
+  ravenclaw: { wall: '#d8e4f8', trim: '#b8926a', floor: '#e2d4c0', crest: '#1d4ed8', win: '#60a5fa', winEmit: '#3b82f6', hearth: '#60a5fa' },
+  hufflepuff: { wall: '#fdecc8', trim: '#d4a373', floor: '#f6d5a8', crest: '#eab308', win: '#fef08a', winEmit: '#f59e0b', hearth: '#ffb703' },
+};
+
+export function applyCastleShellHouseTheme(wrapper, house = 'gryffindor', weather = 'day', isCommonRoom = false) {
+  if (!wrapper) return;
+  const th = isCommonRoom ? (CASTLE_HOUSE_ARCH_THEMES[house] || CASTLE_HOUSE_ARCH_THEMES.gryffindor) : CASTLE_HOUSE_ARCH_THEMES.gryffindor;
+  const isNight = weather === 'night';
+  wrapper.traverse((node) => {
+    if (!node.isMesh || !node.material) return;
+    const mats = Array.isArray(node.material) ? node.material : [node.material];
+    for (const mat of mats) {
+      if (!mat) continue;
+      const nm = mat.name || '';
+      if (nm.startsWith('Mat_HouseWall')) setMatColor(mat, th.wall);
+      else if (nm.startsWith('Mat_HouseTrim')) setMatColor(mat, th.trim);
+      else if (nm.startsWith('Mat_FloorWood')) setMatColor(mat, th.floor);
+      else if (nm.startsWith('Mat_HousePrimary')) setMatColor(mat, th.crest);
+      else if (nm.startsWith('Mat_WindowPortal')) {
+        const wCol = isNight && !isCommonRoom ? '#60a5fa' : th.win;
+        const wEm = isNight && !isCommonRoom ? '#2563eb' : th.winEmit;
+        setMatColor(mat, wCol, wEm, isNight ? 2.1 : 1.45);
+      } else if (nm.startsWith('Mat_HearthGlow')) {
+        setMatColor(mat, th.hearth, th.hearth, 2.3);
+      }
     }
   });
 }

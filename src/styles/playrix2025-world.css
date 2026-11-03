@@ -164,6 +164,11 @@
   background: radial-gradient(circle at 35% 28%, #63e6be 0%, #199268 62%, #0b4a35 100%);
 }
 
+.p25-btn-cam {
+  background: radial-gradient(circle at 35% 28%, #d0bfff 0%, #7950f2 62%, #3b228a 100%);
+}
+
+.p25-btn-cam.is-active,
 .p25-btn-design.is-active,
 .p25-btn-menu.is-active {
   border-color: #ffffff;
@@ -448,3 +453,4 @@
     font-size: 2rem;
   }
 }
+

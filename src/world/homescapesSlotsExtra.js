@@ -9,6 +9,7 @@ import {
   drawEnchantedPropMotes,
   drawFireplaceFlames,
   drawMovingBoxProp,
+  getCastleSlotScreenAndWorld,
 } from './homescapesVfx.js';
 
 export const ROOM_ANCHORS = [
@@ -183,7 +184,7 @@ export function renderExtraCastleSlots(
   const getPt = (task, done) => {
     if (!skipAddSpot) return addSpot(task, done);
     const [nx, ny] = anchors[task.slot] || [0.5, 0.6];
-    return scene.pt(nx, ny);
+    return getCastleSlotScreenAndWorld(scene, task.slot, nx, ny);
   };
 
   // 7. Wall Banner & Enchanted Portrait ('banner')
@@ -195,7 +196,7 @@ export function renderExtraCastleSlots(
     if (st.done) {
       if (!has3D) drawCastleHouseBanner(ctx, pt.x, pt.y, sc, st.styleIdx, st.style, timeSec, st.preview);
       drawEnchantedPropMotes(ctx, pt.x, pt.y - 10 * sc, sc * 0.85, timeSec, st.style?.secondary || '#ffd166');
-    } else {
+    } else if (!scene?.isFull3D) {
       ctx.save();
       ctx.strokeStyle = 'rgba(255, 224, 150, 0.34)';
       ctx.setLineDash([5 * sc, 4 * sc]);

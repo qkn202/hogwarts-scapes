@@ -7,9 +7,11 @@
 import { GARDENSCAPES_AREAS } from '../data/gardenscapesStory.js';
 import { normalizeHogwartsHouse } from '../data/houseCommonRooms.js';
 import { sprites } from '../utils/spriteLoader.js';
+import { isGraphics3dEnabled } from '../world3d/sharedWebgl.js';
 import { getWorld3DStage } from '../world3d/world3dStage.js';
 import {
   computeWanderingPetPos,
+  computeWanderingPetWorld3D,
   drawLongPressRing,
   drawReparoSpellBeam,
   drawWeatherAtmosphere,
@@ -111,9 +113,11 @@ export class GardenscapesWorldRenderer {
       this.austinTimer = austinLine ? 4.2 : 0;
     }
 
-    const activeArea = GARDENSCAPES_AREAS[this.areaIndex] || GARDENSCAPES_AREAS[0];
-    const sIdx = (activeArea.sceneIndex ?? this.areaIndex) % GARDEN_ANCHORS.length;
-    sprites.ensure(activeArea.sceneKey || `garden_zone_${sIdx}`, 'high');
+    if (!isGraphics3dEnabled()) {
+      const activeArea = GARDENSCAPES_AREAS[this.areaIndex] || GARDENSCAPES_AREAS[0];
+      const sIdx = (activeArea.sceneIndex ?? this.areaIndex) % GARDEN_ANCHORS.length;
+      sprites.ensure(activeArea.sceneKey || `garden_zone_${sIdx}`, 'high');
+    }
 
     if (this.areaIndex !== prevArea || this.readOnlyVisitor !== prevVisitor) {
       this._focusedArea = this.areaIndex;
@@ -141,7 +145,7 @@ export class GardenscapesWorldRenderer {
   _slotScreenPoint(slot) {
     const anchors = this._getActiveAnchors();
     const [nx, ny] = (slot && anchors[slot]) || [0.5, 0.58];
-    if (this._scene) return this._scene.pt(nx, ny);
+    if (this._scene) return this._scene.pt(nx, ny, 0, slot);
     return { x: (this.viewW || 800) * nx, y: (this.viewH || 520) * ny };
   }
 
@@ -165,8 +169,11 @@ export class GardenscapesWorldRenderer {
 
   triggerRenovationBurst(slot = null) {
     const { x: tx, y: ty } = this._slotScreenPoint(slot);
+    const anchors = this._getActiveAnchors();
+    const [nx, ny] = (slot && anchors[slot]) || [0.5, 0.58];
+    const worldTarget = this._scene?.isFull3D ? this._scene.normToWorld(nx, ny, 0, slot) : null;
     this.starArc = { x1: 68, y1: 28, x2: tx, y2: ty, t: 0 };
-    this.spellCast = { slot, tx, ty, t: 0, duration: 1.35 };
+    this.spellCast = { slot, tx, ty, worldTarget, t: 0, duration: 1.35 };
     for (let i = 0; i < 48; i++) {
       const ang = Math.random() * Math.PI * 2;
       const spd = 48 + Math.random() * 170;
@@ -187,7 +194,7 @@ export class GardenscapesWorldRenderer {
     this.running = true;
     const area = GARDENSCAPES_AREAS[this.areaIndex] || GARDENSCAPES_AREAS[0];
     const sIdx = (area.sceneIndex ?? this.areaIndex) % GARDEN_ANCHORS.length;
-    sprites.preloadForGame('gardenscapes', area.sceneKey || `garden_zone_${sIdx}`);
+    sprites.preloadForGame('gardenscapes', isGraphics3dEnabled() ? null : (area.sceneKey || `garden_zone_${sIdx}`));
     this.resize();
     let last = performance.now();
     const loop = (now) => {
@@ -302,54 +309,104 @@ export class GardenscapesWorldRenderer {
     const zoneMod = (area.sceneIndex ?? this.areaIndex) % GARDEN_ANCHORS.length;
     const anchors = GARDEN_ANCHORS[zoneMod] || GARDEN_ANCHORS[0];
 
-    const scene = drawSceneBackdrop(
-      ctx,
-      w,
-      h,
-      area.sceneKey || `garden_zone_${zoneMod}`,
-      '#164a31',
-      '#071b11',
-      this.camera,
-      `garden_zone_${zoneMod % 4}`
-    );
-    this._scene = scene;
-    const sc = scene.scale;
-    if (area.accentTint) {
-      ctx.fillStyle = area.accentTint;
-      ctx.fillRect(0, 0, w, h);
+    const stage3D = getWorld3DStage('gardenscapes');
+    const scene3D = stage3D.prepareSceneFrame(this, w, h, false);
+
+    let sc;
+    let ax;
+    let ay;
+    let px;
+    let py;
+    let pass3D = { active: false, renderedTaskIds: null, prefectReady: false, petReady: false };
+
+    if (scene3D) {
+      this._scene = scene3D;
+      sc = scene3D.scale;
+      this.hotspots = [];
+      const orderedSlots = prepareGardenGroundAndHotspots(this, ctx, area, scene3D, sc, timeSec, true);
+
+      const pathTask = area.tasks.find((t) => t.slot === 'path');
+      const pathSt = this._getTaskStyle(pathTask);
+      const pathW = scene3D.normToWorld(anchors.path[0], anchors.path[1], 0, 'path');
+      const medallionSpec = {
+        isCastle: false,
+        done: pathSt.done,
+        styleIdx: pathSt.styleIdx,
+        primary: pathSt.style?.primary || '#d4af37',
+        secondary: pathSt.style?.secondary || '#166541',
+        accent: pathSt.style?.accent || '#fff8d6',
+        worldX: pathW.x,
+        worldZ: pathW.z,
+      };
+
+      const baseAW = scene3D.normToWorld(anchors.austin[0], anchors.austin[1], 0, 'austin');
+      const austinWorld = { x: baseAW.x, z: baseAW.z };
+      if (this.spellCast?.worldTarget) {
+        const walkAmt = Math.sin(Math.min(1, this.spellCast.t / this.spellCast.duration) * Math.PI) * 0.36;
+        austinWorld.x += (this.spellCast.worldTarget.x - austinWorld.x) * walkAmt;
+        austinWorld.z += (this.spellCast.worldTarget.z - austinWorld.z) * walkAmt;
+      }
+      const basePW = scene3D.normToWorld(anchors.pet[0], anchors.pet[1], 0, 'pet');
+      const petWorld = computeWanderingPetWorld3D(basePW, this.hotspots, timeSec);
+
+      pass3D = stage3D.renderPass(this, area, scene3D, timeSec, {
+        envIdx: zoneMod,
+        austinWorld,
+        petWorld,
+        medallionSpec,
+      });
+
+      const aScr = scene3D.projectWorld(austinWorld.x, 0, austinWorld.z);
+      const pScr = scene3D.projectWorld(petWorld.x, 0, petWorld.z);
+      ax = aScr.x;
+      ay = aScr.y;
+      px = pScr.x;
+      py = pScr.y;
+
+      renderGardenZoneSlots(this, ctx, area, scene3D, sc, timeSec, pass3D.renderedTaskIds, orderedSlots);
+    } else {
+      const scene = drawSceneBackdrop(
+        ctx,
+        w,
+        h,
+        area.sceneKey || `garden_zone_${zoneMod}`,
+        '#164a31',
+        '#071b11',
+        this.camera,
+        `garden_zone_${zoneMod % 4}`
+      );
+      this._scene = scene;
+      sc = scene.scale;
+      if (area.accentTint) {
+        ctx.fillStyle = area.accentTint;
+        ctx.fillRect(0, 0, w, h);
+      }
+      const pathTask = area.tasks.find((t) => t.slot === 'path');
+      const pathSt = this._getTaskStyle(pathTask);
+      if (!pathSt.done) {
+        ctx.fillStyle = 'rgba(18, 26, 20, 0.14)';
+        ctx.fillRect(0, 0, w, h);
+      }
+      this.hotspots = [];
+      const orderedSlots = prepareGardenGroundAndHotspots(this, ctx, area, scene, sc, timeSec, false);
+
+      const baseAustin = scene.pt(anchors.austin[0], anchors.austin[1]);
+      ax = baseAustin.x;
+      ay = baseAustin.y;
+      if (this.spellCast) {
+        const walkAmt = Math.sin(Math.min(1, this.spellCast.t / this.spellCast.duration) * Math.PI) * 0.36;
+        ax += (this.spellCast.tx - ax) * walkAmt;
+        ay += (this.spellCast.ty - ay) * walkAmt;
+      }
+      const pPt = scene.pt(anchors.pet[0], anchors.pet[1]);
+      const pPos = computeWanderingPetPos(pPt, this.hotspots, sc, timeSec, this.petHop);
+      px = pPos.x;
+      py = pPos.y;
+
+      renderGardenZoneSlots(this, ctx, area, scene, sc, timeSec, null, orderedSlots);
+      drawFloatingMagicMotes(ctx, w, h, sc, timeSec);
+      drawWeatherAtmosphere(ctx, w, h, sc, timeSec, this.weather);
     }
-
-    const pathTask = area.tasks.find((t) => t.slot === 'path');
-    const pathSt = this._getTaskStyle(pathTask);
-    if (!pathSt.done) {
-      ctx.fillStyle = 'rgba(18, 26, 20, 0.14)';
-      ctx.fillRect(0, 0, w, h);
-    }
-
-    this.hotspots = [];
-    const orderedSlots = prepareGardenGroundAndHotspots(this, ctx, area, scene, sc, timeSec);
-
-    const baseAustin = scene.pt(anchors.austin[0], anchors.austin[1]);
-    let ax = baseAustin.x;
-    let ay = baseAustin.y;
-    if (this.spellCast) {
-      const walkAmt = Math.sin(Math.min(1, this.spellCast.t / this.spellCast.duration) * Math.PI) * 0.36;
-      ax += (this.spellCast.tx - ax) * walkAmt;
-      ay += (this.spellCast.ty - ay) * walkAmt;
-    }
-    const pPt = scene.pt(anchors.pet[0], anchors.pet[1]);
-    const { x: px, y: py } = computeWanderingPetPos(pPt, this.hotspots, sc, timeSec, this.petHop);
-
-    // Hybrid 3D WebGL Pass (locked isometric camera + real Blender .glb relics, Prefect & Niffler!)
-    const pass3D = getWorld3DStage('gardenscapes').renderPass(this, area, scene, sc, timeSec, {
-      austinPt: { x: ax, y: ay },
-      petPt: { x: px, y: py },
-    });
-
-    renderGardenZoneSlots(this, ctx, area, scene, sc, timeSec, pass3D.renderedTaskIds, orderedSlots);
-
-    drawFloatingMagicMotes(ctx, w, h, sc, timeSec);
-    drawWeatherAtmosphere(ctx, w, h, sc, timeSec, this.weather);
 
     if (!this.readOnlyVisitor) {
       for (const hs of this.hotspots) {

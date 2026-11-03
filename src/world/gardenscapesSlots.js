@@ -169,20 +169,24 @@ function drawMagicalWaterArcs(ctx, x, y, sc, timeSec, style) {
   ctx.restore();
 }
 
-export function prepareGardenGroundAndHotspots(renderer, ctx, area, scene, sc, timeSec) {
+export function prepareGardenGroundAndHotspots(renderer, ctx, area, scene, sc, timeSec, skip2DGround = false) {
   const zoneMod = (area.sceneIndex ?? renderer.areaIndex) % GARDEN_ANCHORS.length;
   const anchors = GARDEN_ANCHORS[zoneMod] || GARDEN_ANCHORS[0];
   const relicMap = ZONE_RELIC_PROPS[zoneMod] || ZONE_RELIC_PROPS[0];
 
   const addSpot = (task, done) => {
     const [nx, ny] = anchors[task.slot] || [0.5, 0.6];
-    const p = scene.pt(nx, ny);
+    const wPos = scene.isFull3D ? scene.normToWorld(nx, ny, 0, task.slot) : null;
+    const p = wPos ? scene.projectWorld(wPos.x, wPos.y, wPos.z) : scene.pt(nx, ny);
     renderer.hotspots.push({
       task,
       nx,
       ny,
       x: p.x,
       y: p.y,
+      wx: wPos?.x,
+      wy: wPos?.y || 0,
+      wz: wPos?.z,
       pinY: p.y - 24 * sc,
       r: Math.max(30, 41 * sc),
       completed: done,
@@ -190,14 +194,16 @@ export function prepareGardenGroundAndHotspots(renderer, ctx, area, scene, sc, t
     return p;
   };
 
-  // 1. Central Rune Plaza ('path') drawn on ground plane beneath 3D shadows & models
+  // 1. Central Rune Plaza ('path')
   const pathTask = area.tasks.find((t) => t.slot === 'path');
   const pathSt = renderer._getTaskStyle(pathTask);
   const pathPt = addSpot(pathTask, pathSt.done);
-  if (pathSt.done) {
-    drawHogwartsRuneCircle(ctx, pathPt.x, pathPt.y, sc, timeSec, pathSt.styleIdx, pathSt.style, pathSt.preview);
-  } else {
-    drawDormantRuneSeal(ctx, pathPt.x, pathPt.y, sc, timeSec);
+  if (!skip2DGround) {
+    if (pathSt.done) {
+      drawHogwartsRuneCircle(ctx, pathPt.x, pathPt.y, sc, timeSec, pathSt.styleIdx, pathSt.style, pathSt.preview);
+    } else {
+      drawDormantRuneSeal(ctx, pathPt.x, pathPt.y, sc, timeSec);
+    }
   }
 
   const orderedSlots = ['flora', 'seating', 'lighting', 'centerpiece', 'special', 'fountain_wing', 'guardian', 'pavilion']
@@ -211,13 +217,15 @@ export function prepareGardenGroundAndHotspots(renderer, ctx, area, scene, sc, t
     .filter(Boolean)
     .sort((a, b) => a.pt.y - b.pt.y);
 
-  // Ground plinths & dormant rune seals sit on the lawn beneath 3D shadows
-  for (const { st, pt, spec } of orderedSlots) {
-    if (!spec) continue;
-    if (st.done && spec.vfx === 'plinth') {
-      drawIsoDiamond(ctx, pt.x, pt.y + 18 * sc, 36 * sc, 16 * sc, st.style?.secondary || '#1d3557', st.style?.primary || '#ffd166');
-    } else if (!st.done && spec.vfx !== 'boat') {
-      drawDormantRuneSeal(ctx, pt.x, pt.y + 8 * sc, sc * 0.68, timeSec);
+  // Ground plinths & dormant rune seals (2.5D fallback only)
+  if (!skip2DGround) {
+    for (const { st, pt, spec } of orderedSlots) {
+      if (!spec) continue;
+      if (st.done && spec.vfx === 'plinth') {
+        drawIsoDiamond(ctx, pt.x, pt.y + 18 * sc, 36 * sc, 16 * sc, st.style?.secondary || '#1d3557', st.style?.primary || '#ffd166');
+      } else if (!st.done && spec.vfx !== 'boat') {
+        drawDormantRuneSeal(ctx, pt.x, pt.y + 8 * sc, sc * 0.68, timeSec);
+      }
     }
   }
 
