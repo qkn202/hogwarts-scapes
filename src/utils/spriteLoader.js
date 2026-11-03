@@ -16,13 +16,14 @@ const ASSET_MANIFEST = {
   home_room_4: '/assets/home-room-4.webp',
   home_room_5: '/assets/home-room-5.webp',
 
-  // Isometric 2.5D Estate Gardens (Gardenscapes — 6 Panoramic Hogwarts Grounds & Hogsmeade Plazas)
+  // Isometric 2.5D Estate Gardens (Gardenscapes — 7 Panoramic Hogwarts Grounds, The Burrow & Hogsmeade)
   garden_zone_0: '/assets/garden-zone-0.webp',
   garden_zone_1: '/assets/garden-zone-1.webp',
   garden_zone_2: '/assets/garden-zone-2.webp',
   garden_zone_3: '/assets/garden-zone-3.webp',
   garden_zone_4: '/assets/garden-zone-4.webp',
   garden_zone_5: '/assets/garden-zone-5.webp',
+  garden_zone_6: '/assets/garden-zone-6.webp',
 
   // Characters & Boosters
   austin: '/assets/char-austin.webp',

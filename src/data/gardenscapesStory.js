@@ -12,6 +12,8 @@ export const GARDENSCAPES_CHARACTERS = {
   puppy: { name: 'Niffler', role: 'Nhím Mỏ Vịt săn Galleon', color: '#d4af37', avatar: '🐾' },
   robbie: { name: 'Bác Hagrid', role: 'Người giữ khóa & Rừng Cấm', color: '#7f4f24', avatar: '🧔' },
   martha: { name: 'Giáo Sư Sprout', role: 'Chủ nhiệm Thảo Dược Học', color: '#2d8a5e', avatar: '👩‍🌾' },
+  molly: { name: 'Bà Molly Weasley', role: 'Chủ nhân Trang Trại Hang Sóc', color: '#c1121f', avatar: '🧶' },
+  arthur: { name: 'Ông Arthur Weasley', role: 'Trưởng phòng Đồ Tạo Tác Muggle', color: '#d97706', avatar: '🚗' },
 };
 
 const STYLES_PENSIEVE = [

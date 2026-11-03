@@ -132,7 +132,7 @@ const EXTRA_GARDEN_TASKS_BY_AREA = {
     {
       id: 'gr_guardian',
       slot: 'guardian',
-      title: 'Đặt Tượng Thần Mùa Xuân Giữa Sân Phụ Nhà Kính Số 3',
+      title: 'Đặt Tượng Thần Mùa Xuân Giữa Sân Phụ Nhà Kính Thảo Dược',
       cost: 4,
       icon: '🗽',
       desc: 'Giúp cây cối xung quanh luôn xanh tươi bất chấp sương giá mùa đông.',
@@ -218,32 +218,32 @@ const EXTRA_GARDEN_TASKS_BY_AREA = {
     {
       id: 'go_wing_fnt',
       slot: 'fountain_wing',
-      title: 'Xây Hồ Thủy Sinh Nuôi Cỏ Mang Cá Gillyweed',
+      title: 'Khơi Trong Bến Đá Hồ Vịt Bên Rặng Táo Ottery',
       cost: 5,
-      icon: '🌿',
-      desc: 'Bể đá sục bọt khí phép giữ cho thảo dược Địa Trung Hải luôn tươi mới.',
+      icon: '🦆',
+      desc: 'Đài đá phép lọc nước hồ trong veo bên bờ lau sậy cho đàn vịt quê tung tăng bơi lội.',
       styles: STYLES_WING_FOUNTAIN,
-      afterDialogue: 'Những nhánh cỏ Mang Cá xanh mướt uốn lượn trong làn nước trong veo!',
+      afterDialogue: 'Mặt hồ cạnh rặng táo lấp lánh ánh hoàng hôn, đàn vịt quạc quạc thích thú bơi quanh!',
     },
     {
       id: 'go_guardian',
       slot: 'guardian',
-      title: 'Đặt Tượng Rồng Nhỏ Phun Hơi Ấm Sưởi Vườn Lan Đêm',
+      title: 'Dựng Hiệp Sĩ Bù Nhìn Phép Canh Luống Bí Ngô Đuổi Gnome',
       cost: 6,
-      icon: '🐉',
-      desc: 'Giữ nhiệt độ lý tưởng cho các loài hoa nhiệt đới nở rộ về đêm.',
+      icon: '🛡️',
+      desc: 'Giáp sắt yểm bùa gõ khiên leng keng mỗi khi có chú lùn vườn định lẻn vào nhổ rau cải của bà Molly.',
       styles: STYLES_GUARDIAN_STATUE,
-      afterDialogue: 'Tượng rồng đá khẽ thở làn hơi ấm áp làm vườn lan bung cánh ngát hương!',
+      afterDialogue: 'Luống bí ngô và bắp cải xanh mướt bên hông Hang Sóc đã có vệ sĩ canh gác ngày đêm!',
     },
     {
       id: 'go_pavilion',
       slot: 'pavilion',
-      title: 'Bố Trí Vòm Hoa Hồng Leo & Ghế Nghỉ Cánh Đông',
+      title: 'Bày Băng Ghế Nghỉ Mát & Trạm Đỗ Xe Bay Ford Anglia',
       cost: 6,
-      icon: '🌺',
-      desc: 'Không gian thư giãn tuyệt đẹp sau giờ thực hành Thảo Dược Học.',
+      icon: '🚗',
+      desc: 'Góc dừng chân đầu ngõ đón chiếc xe Ford Anglia xanh ngọc bay về sau mỗi chuyến phiêu lưu.',
       styles: STYLES_GARDEN_PAVILION,
-      afterDialogue: 'Cánh Đông Nhà Kính đã biến thành khu vườn cổ tích ngập tràn sắc hương!',
+      afterDialogue: 'Ông Arthur trầm trồ vỗ tay khen ngợi trạm đỗ xe bay mới toanh đầu ngõ Hang Sóc!',
     },
   ],
   gv_7: [
@@ -287,14 +287,14 @@ const SCENE_INDEX_BY_GARDEN_AREA = {
   3: 3,
   gq_4: 0,
   gh_5: 1,
-  go_6: 3,
+  go_6: 6,
   gv_7: 5,
 };
 
 export function attachExtraGardenSlots(baseAreas) {
   return baseAreas.map((area) => {
     const extras = EXTRA_GARDEN_TASKS_BY_AREA[area.id] || [];
-    const sceneIndex = SCENE_INDEX_BY_GARDEN_AREA[area.id] ?? 0;
+    const sceneIndex = area.sceneIndex ?? SCENE_INDEX_BY_GARDEN_AREA[area.id] ?? 0;
     return {
       ...area,
       sceneIndex,

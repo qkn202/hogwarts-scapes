@@ -1,6 +1,6 @@
 /**
  * Panoramic 9-Slot Anchor Layouts & Relic Renderers for Hogwarts Grounds (`gardenscapes`)
- * Supports all 6 Panoramic 2.5D Outdoor Backdrops (`garden_zone_0..5`) across 12 Zones!
+ * Supports all 7 Panoramic 2.5D Outdoor Backdrops (`garden_zone_0..6`) across 12 Zones!
  */
 
 import { drawIsoDiamond, drawStyledPropSprite } from './isoMath.js';
@@ -56,6 +56,13 @@ export const GARDEN_ANCHORS = [
     seating: [0.76, 0.68], lighting: [0.38, 0.42], special: [0.15, 0.37],
     fountain_wing: [0.24, 0.70], guardian: [0.88, 0.76], pavilion: [0.49, 0.85],
     austin: [0.39, 0.78], pet: [0.58, 0.82],
+  },
+  // Zone 6: Trang Trại Hang Sóc — The Burrow (Weasley Family Farmstead)
+  {
+    path: [0.49, 0.75], centerpiece: [0.49, 0.61], flora: [0.23, 0.73],
+    seating: [0.27, 0.48], lighting: [0.69, 0.65], special: [0.41, 0.40],
+    fountain_wing: [0.12, 0.51], guardian: [0.85, 0.63], pavilion: [0.74, 0.86],
+    austin: [0.58, 0.82], pet: [0.38, 0.84],
   },
 ];
 
@@ -124,6 +131,17 @@ export const ZONE_RELIC_PROPS = [
     special: { key: 'g_prop_owlery', size: 152 },
     fountain_wing: { key: 'g_prop_pensieve', size: 148, vfx: 'pensieve' },
     guardian: { key: 'g_prop_statue', size: 152, vfx: 'plinth' },
+    pavilion: { key: 'g_prop_bench', size: 148, lamp: true },
+  },
+  // Scene 6: Trang Trại Hang Sóc — The Burrow
+  {
+    centerpiece: { key: 'g_prop_fountain', size: 162, vfx: 'water_arcs' },
+    flora: { key: 'g_prop_triwizard', size: 148, vfx: 'sparks' },
+    seating: { key: 'g_prop_gazebo', size: 180 },
+    lighting: { key: 'g_prop_candles', size: 158, vfx: 'candles' },
+    special: { key: 'g_prop_owlery', size: 158 },
+    fountain_wing: { key: 'g_prop_pensieve', size: 150, vfx: 'pensieve' },
+    guardian: { key: 'g_prop_knight', size: 154, vfx: 'plinth' },
     pavilion: { key: 'g_prop_bench', size: 148, lamp: true },
   },
 ];

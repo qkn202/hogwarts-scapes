@@ -1,6 +1,6 @@
 /**
  * Harry Potter Hogwarts Grounds 2.5D Isometric World Renderer (Gardenscapes)
- * Renders 12 Iconic Zones × 9 Magical Relics across 6 Panoramic 2.5D Outdoor Backdrops (`garden_zone_0..5`)
+ * Renders 12 Iconic Zones × 9 Magical Relics across 7 Panoramic 2.5D Outdoor Backdrops (`garden_zone_0..6`)
  * with Smooth Pan/Zoom Camera, Mini-Radar, 4-Edge Offscreen Pills, Weather, Reparo Beam & Visitor Mode!
  */
 
@@ -94,7 +94,7 @@ export class GardenscapesWorldRenderer {
     if (austinLine !== null) this.austinLine = austinLine;
 
     const activeArea = GARDENSCAPES_AREAS[this.areaIndex] || GARDENSCAPES_AREAS[0];
-    const sIdx = (activeArea.sceneIndex ?? this.areaIndex) % 6;
+    const sIdx = (activeArea.sceneIndex ?? this.areaIndex) % GARDEN_ANCHORS.length;
     sprites.ensure(activeArea.sceneKey || `garden_zone_${sIdx}`, 'high');
 
     if (this.areaIndex !== prevArea || this.readOnlyVisitor !== prevVisitor) {
@@ -168,7 +168,7 @@ export class GardenscapesWorldRenderer {
     if (this.running) return;
     this.running = true;
     const area = GARDENSCAPES_AREAS[this.areaIndex] || GARDENSCAPES_AREAS[0];
-    const sIdx = (area.sceneIndex ?? this.areaIndex) % 6;
+    const sIdx = (area.sceneIndex ?? this.areaIndex) % GARDEN_ANCHORS.length;
     sprites.preloadForGame('gardenscapes', area.sceneKey || `garden_zone_${sIdx}`);
     this.resize();
     let last = performance.now();
@@ -284,7 +284,7 @@ export class GardenscapesWorldRenderer {
       ctx,
       w,
       h,
-      `garden_zone_${zoneMod}`,
+      area.sceneKey || `garden_zone_${zoneMod}`,
       '#164a31',
       '#071b11',
       this.camera,
